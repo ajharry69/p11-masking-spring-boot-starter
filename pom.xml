@@ -45,6 +45,7 @@
     <modules>
         <module>books-api-demo</module>
         <module>p11-masking-spring-boot-starter</module>
+        <module>report-aggregate</module>
     </modules>
 
     <build>
