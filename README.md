@@ -31,6 +31,8 @@ Run the demo API using Testcontainers (Oracle Free):
 mvn -pl books-api-demo -am spring-boot:test-run -DskipTests
 ```
 
+The APIs can be tested through - http://localhost:8080/swagger-ui.html
+
 ## Config (demo)
 
 ```yaml

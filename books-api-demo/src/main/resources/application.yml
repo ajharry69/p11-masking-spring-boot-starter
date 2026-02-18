@@ -16,7 +16,9 @@ spring:
       skip:
         in-tests: true
       enabled: false
-
+springdoc:
+  default-support-form-data: true
+  paths-to-match: /api/**
 p11:
   masking:
     enabled: true
