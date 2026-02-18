@@ -25,10 +25,10 @@ Run all tests (includes Testcontainers-based API tests):
 mvn -q -DskipITs=false test
 ```
 
-Run the demo API only:
+Run the demo API using Testcontainers (Oracle Free):
 
 ```bash
-mvn -q -pl books-api-demo spring-boot:run
+mvn -pl books-api-demo -am spring-boot:test-run -DskipTests
 ```
 
 ## Config (demo)
