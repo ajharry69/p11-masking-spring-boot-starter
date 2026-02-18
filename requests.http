@@ -1,0 +1,16 @@
+POST http://localhost:8080/api/v1/books
+Content-Type: application/json
+
+{
+  "id": 0,
+  "title": "{{$random.book.title}}",
+  "author": "{{$random.book.author}}",
+  "email": "{{$random.email}}",
+  "phoneNumber": "{{$random.phoneNumber.phoneNumber}}"
+}
+
+<> 2026-02-18T161339.200.json
+
+###
+GET http://localhost:8080/api/v1/books
+Content-Type: application/json

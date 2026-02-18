@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: books-api-demo
+  jpa:
+    show-sql: true
+    generate-ddl: true
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        format_sql: true
+  docker:
+    compose:
+      stop:
+        command: down
+      skip:
+        in-tests: true
+      enabled: false
+
+p11:
+  masking:
+    enabled: true
+    mask-style: PARTIAL
+    mask-character: "*"
+    fields:
+      - email
+      - phoneNumber
