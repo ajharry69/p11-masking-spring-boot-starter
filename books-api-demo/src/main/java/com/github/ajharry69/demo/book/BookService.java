@@ -3,9 +3,9 @@ package com.github.ajharry69.demo.book;
 import com.github.ajharry69.demo.book.exceptions.BookNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @Slf4j
@@ -13,9 +13,11 @@ import org.springframework.stereotype.Service;
 public class BookService {
     private final BookRepository bookRepository;
 
-    public Page<BookDto> getAllBooks(Pageable pageable) {
-        return bookRepository.findAll(pageable)
-                .map(BookService::getBookDto);
+    public List<BookDto> getAllBooks() {
+        return bookRepository.findAll()
+                .stream()
+                .map(BookService::getBookDto)
+                .toList();
     }
 
     public BookDto createBook(BookDto book) {

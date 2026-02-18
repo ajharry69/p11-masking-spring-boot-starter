@@ -1,15 +1,11 @@
 package com.github.ajharry69.demo.book;
 
 import com.github.ajharry69.demo.book.exceptions.BookNotFoundException;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 
 import java.util.List;
 import java.util.Optional;
@@ -30,16 +26,15 @@ class BookServiceTest {
     private final BookService service = new BookService(bookRepository);
 
     @Test
-    void shouldGetAllBooksPaged() {
-        var pageable = PageRequest.of(0, 2);
+    void shouldGetAllBooks() {
         var book1 = Book.builder().id(1L).title("T1").author("A1").email("e1@test.com").phoneNumber("0712345678").build();
         var book2 = Book.builder().id(2L).title("T2").author("A2").email("e2@test.com").phoneNumber("0712345679").build();
-        when(bookRepository.findAll(pageable)).thenReturn(new PageImpl<>(List.of(book1, book2), pageable, 2));
+        when(bookRepository.findAll()).thenReturn(List.of(book1, book2));
 
-        Page<BookDto> page = service.getAllBooks(pageable);
+        List<BookDto> list = service.getAllBooks();
 
-        assertThat(page.getTotalElements(), is(2L));
-        assertThat(page.getContent(), contains(
+        assertThat(list.size(), is(2));
+        assertThat(list, contains(
                 new BookDto("T1", "A1", "e1@test.com", "0712345678"),
                 new BookDto("T2", "A2", "e2@test.com", "0712345679")
         ));

@@ -49,7 +49,6 @@ class BookControllerAPITest {
 
         given()
                 .contentType(ContentType.JSON)
-                .accept("application/hal+json")
                 .body(payload)
                 .when()
                 .post("/api/v1/books")
@@ -77,7 +76,6 @@ class BookControllerAPITest {
                 }""";
 
         given().contentType(ContentType.JSON)
-                .accept("application/hal+json")
                 .body(update)
                 .when().put("/api/v1/books/{id}", id)
                 .then().statusCode(200)
