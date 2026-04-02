@@ -12,7 +12,7 @@ import java.util.List;
 @RequestMapping(value = "/api/v1/books")
 public class BookController {
     private final BookService bookService;
-    
+
     @GetMapping
     public ResponseEntity<List<BookDto>> getAllBooks() {
         var books = bookService.getAllBooks();
