@@ -45,10 +45,11 @@ class KCBExceptionHandlerTest {
         public void throwValidationException() throws MethodArgumentNotValidException {
             var bindingResult = new BeanPropertyBindingResult(new Object(), "testObject");
             bindingResult.addError(new FieldError("testObject", "title", "must not be blank"));
-            
-            var method = new Object(){}.getClass().getEnclosingMethod();
+
+            var method = new Object() {
+            }.getClass().getEnclosingMethod();
             var parameter = new MethodParameter(method, -1);
-            
+
             throw new MethodArgumentNotValidException(parameter, bindingResult);
         }
     }
