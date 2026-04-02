@@ -13,6 +13,10 @@ import java.util.List;
 public class BookService {
     private final BookRepository bookRepository;
 
+    private static BookDto getBookDto(Book book) {
+        return new BookDto(book.getTitle(), book.getAuthor(), book.getEmail(), book.getPhoneNumber());
+    }
+
     public List<BookDto> getAllBooks() {
         return bookRepository.findAll()
                 .stream()
@@ -33,7 +37,7 @@ public class BookService {
         return getBookDto(savedBook);
     }
 
-    public BookDto  getBookById(Long id) {
+    public BookDto getBookById(Long id) {
         log.info("Getting book by id: {}", id);
         var book = bookRepository.findById(id)
                 .orElseThrow(BookNotFoundException::new);
@@ -53,10 +57,6 @@ public class BookService {
         var book = bookRepository.save(existingBook);
         log.info("Updated book: {}", book);
         return getBookDto(book);
-    }
-
-    private static BookDto getBookDto(Book book) {
-        return new BookDto(book.getTitle(), book.getAuthor(), book.getEmail(), book.getPhoneNumber());
     }
 
     public void deleteBook(Long id) {
