@@ -16,7 +16,7 @@ public class MaskingService {
 
         var ch = resolveMaskCharacter(maskCharacterOverride);
         return switch (resolveStyle(styleOverride)) {
-            case FULL -> ch.repeat(8);
+            case FULL, DEFAULT -> ch.repeat(8);
             case LAST4 -> {
                 if (input.length() <= 4) yield ch.repeat(input.length());
                 yield ch.repeat(input.length() - 4) + input.substring(input.length() - 4);
@@ -31,7 +31,6 @@ public class MaskingService {
                 if (input.length() <= 1) yield input;
                 yield input.charAt(0) + ch.repeat(input.length() - 1);
             }
-            case DEFAULT -> ch.repeat(8);
         };
     }
 
