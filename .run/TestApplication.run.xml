@@ -3,7 +3,7 @@
                    factoryName="Spring Boot" nameIsGenerated="true">
         <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources"/>
         <module name="books-api-demo"/>
-        <option name="SPRING_BOOT_MAIN_CLASS" value="com.github.ajharry69.demo.TestApplication"/>
+        <option name="SPRING_BOOT_MAIN_CLASS" value="co.ke.xently.demo.books.TestApplication"/>
         <extension name="coverage">
             <pattern>
                 <option name="PATTERN" value="com.github.ajharry69.demo.*"/>

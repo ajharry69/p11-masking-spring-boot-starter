@@ -63,8 +63,8 @@ Use `@Mask` to force masking on a specific field even if it is not listed in `p1
 Annotation settings override the global properties.
 
 ```java
-import com.github.ajharry69.log.mask.Mask;
-import com.github.ajharry69.log.mask.P11MaskingProperties;
+import co.ke.xently.log.mask.Mask;
+import co.ke.xently.log.mask.P11MaskingProperties;
 
 public record UserDto(
         String name,
