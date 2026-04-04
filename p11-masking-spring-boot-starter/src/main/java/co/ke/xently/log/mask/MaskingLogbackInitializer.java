@@ -6,7 +6,6 @@ import ch.qos.logback.classic.PatternLayout;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.OutputStreamAppender;
-import jakarta.annotation.PostConstruct;
 import org.slf4j.LoggerFactory;
 
 public class MaskingLogbackInitializer {
@@ -18,7 +17,6 @@ public class MaskingLogbackInitializer {
         this.properties = properties;
     }
 
-    @PostConstruct
     public void initialize() {
         MaskingMessageConverter.initialize(maskingService, properties);
         var loggerFactory = LoggerFactory.getILoggerFactory();

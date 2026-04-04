@@ -27,7 +27,7 @@ public class P11MaskingAutoConfiguration {
         return module;
     }
 
-    @Bean
+    @Bean(initMethod = "initialize")
     @ConditionalOnClass(name = "ch.qos.logback.classic.LoggerContext")
     public MaskingLogbackInitializer maskingLogbackInitializer(MaskingService service, P11MaskingProperties props) {
         return new MaskingLogbackInitializer(service, props);
