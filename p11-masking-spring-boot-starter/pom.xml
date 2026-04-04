@@ -3,14 +3,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>com.github.ajharry69</groupId>
-        <artifactId>kcb-p11-masking-spring-boot-starter</artifactId>
+        <groupId>ke.co.xently</groupId>
+        <artifactId>p11-masking-spring-boot</artifactId>
         <version>4.1.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>p11-masking-spring-boot-starter</artifactId>
-    <name>p11-masking-spring-boot-starter</name>
-    <description>p11-masking-spring-boot-starter</description>
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
