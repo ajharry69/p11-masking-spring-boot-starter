@@ -18,12 +18,12 @@
 
     <dependencies>
         <dependency>
-            <groupId>ke.co.xently</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>p11-masking-spring-boot-starter</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>ke.co.xently</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>books-api-demo</artifactId>
             <version>${project.version}</version>
         </dependency>
