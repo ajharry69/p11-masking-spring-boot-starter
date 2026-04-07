@@ -46,6 +46,7 @@ public class MaskingMessageConverter extends ClassicConverter {
 
         var masked = applyValueReplacements(message, context.replacements);
         masked = applyFieldNameMasking(masked, context.fieldOverrides);
+        masked = applyXmlMasking(masked, context.fieldOverrides);
         masked = applyPatternMasking(masked);
         return masked;
     }
@@ -200,6 +201,57 @@ public class MaskingMessageConverter extends ClassicConverter {
             masked = maskFieldOccurrences(masked, field, override);
         }
         return masked;
+    }
+
+    private String applyXmlMasking(String message, Map<String, MaskOverride> overrides) {
+        var fields = properties.getFields();
+        if (fields == null || fields.isEmpty()) return message;
+
+        var masked = message;
+        for (String field : fields) {
+            if (field == null || field.isBlank()) continue;
+            var override = overrides.get(normalize(field));
+            masked = maskXmlElement(masked, field, override);
+        }
+        return masked;
+    }
+
+    private String maskXmlElement(String message, String field, MaskOverride override) {
+        var pattern = Pattern.compile(
+                "(?is)(<(?:\\w+:)?" + Pattern.quote(field) + "\\b[^>]*>)(.*?)(</(?:\\w+:)?"
+                        + Pattern.quote(field) + "\\s*>)"
+        );
+        var matcher = pattern.matcher(message);
+        var buffer = new StringBuilder();
+        while (matcher.find()) {
+            var prefix = matcher.group(1);
+            var value = matcher.group(2);
+            var suffix = matcher.group(3);
+
+            var replacement = prefix + maskXmlValue(value, override) + suffix;
+            matcher.appendReplacement(buffer, Matcher.quoteReplacement(replacement));
+        }
+        matcher.appendTail(buffer);
+        return buffer.toString();
+    }
+
+    private String maskXmlValue(String value, MaskOverride override) {
+        if (value == null || value.isBlank()) return value;
+        if (value.startsWith("<![CDATA[") && value.endsWith("]]>") && value.length() > 12) {
+            var inner = value.substring(9, value.length() - 3);
+            var maskedInner = maskingService.mask(
+                    inner,
+                    override != null ? override.style : null,
+                    override != null ? override.maskCharacter : null
+            );
+            return "<![CDATA[" + maskedInner + "]]>";
+        }
+        if (value.indexOf('<') >= 0) return value;
+        return maskingService.mask(
+                value,
+                override != null ? override.style : null,
+                override != null ? override.maskCharacter : null
+        );
     }
 
     private String maskFieldOccurrences(String message, String field, MaskOverride override) {

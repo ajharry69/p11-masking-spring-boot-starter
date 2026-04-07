@@ -11,7 +11,9 @@ import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +23,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 class MaskingMessageConverterTest {
@@ -30,6 +33,8 @@ class MaskingMessageConverterTest {
     private static final String RAW_TOKEN = "secret-token";
     private static final String RAW_PLAIN = "plainvalue";
     private static final String RAW_SHORT_PHONE = "12345";
+    private static final String MASKED_EMAIL = "j*******@example.com";
+    private static final String MASKED_PHONE = "0*********";
 
     private final P11MaskingProperties properties = P11MaskingProperties.builder()
             .maskStyle(P11MaskingProperties.MaskingStyle.PARTIAL)
@@ -87,6 +92,45 @@ class MaskingMessageConverterTest {
             propsField.set(null, props);
         } catch (Exception ex) {
             throw new IllegalStateException("Failed to reset converter state", ex);
+        }
+    }
+
+    private String invokeMaskXmlValue(String value, Object override) {
+        try {
+            Method method = MaskingMessageConverter.class.getDeclaredMethod("maskXmlValue", String.class, maskOverrideClass());
+            method.setAccessible(true);
+            return (String) method.invoke(converter, value, override);
+        } catch (Exception ex) {
+            throw new IllegalStateException("Failed to invoke maskXmlValue", ex);
+        }
+    }
+
+    private String invokeDeriveFieldName(String methodName) {
+        try {
+            Method method = MaskingMessageConverter.class.getDeclaredMethod("deriveFieldName", String.class);
+            method.setAccessible(true);
+            return (String) method.invoke(converter, methodName);
+        } catch (Exception ex) {
+            throw new IllegalStateException("Failed to invoke deriveFieldName", ex);
+        }
+    }
+
+    private Object newMaskOverride(P11MaskingProperties.MaskingStyle style, String maskCharacter) {
+        try {
+            Constructor<?> constructor = maskOverrideClass()
+                    .getDeclaredConstructor(P11MaskingProperties.MaskingStyle.class, String.class);
+            constructor.setAccessible(true);
+            return constructor.newInstance(style, maskCharacter);
+        } catch (Exception ex) {
+            throw new IllegalStateException("Failed to create MaskOverride", ex);
+        }
+    }
+
+    private Class<?> maskOverrideClass() {
+        try {
+            return Class.forName("co.ke.xently.log.mask.MaskingMessageConverter$MaskOverride");
+        } catch (ClassNotFoundException ex) {
+            throw new IllegalStateException("MaskOverride type not found", ex);
         }
     }
 
@@ -187,6 +231,13 @@ class MaskingMessageConverterTest {
 
     private record CollectionCase(String name, String message, Object[] arguments,
                                   List<String> expected, List<String> unexpected) {
+        @Override
+        public String toString() {
+            return name;
+        }
+    }
+
+    private record SoapCase(String name, String message, List<String> expected, List<String> unexpected) {
         @Override
         public String toString() {
             return name;
@@ -384,6 +435,101 @@ class MaskingMessageConverterTest {
                     () -> assertThat(output, containsString("4****")),
                     () -> assertThat(output, not(containsString(RAW_CARD)))
             );
+        }
+    }
+
+    @Nested
+    class XmlValueMasking {
+        @Test
+        void shouldReturnNullWhenValueIsNull() {
+            var output = invokeMaskXmlValue(null, null);
+
+            assertThat(output, nullValue());
+        }
+
+        @Test
+        void shouldReturnBlankValueAsIs() {
+            var output = invokeMaskXmlValue("   ", null);
+
+            assertThat(output, equalTo("   "));
+        }
+
+        @Test
+        void shouldReturnXmlFragmentsUnchanged() {
+            var output = invokeMaskXmlValue("value<inner>", null);
+
+            assertThat(output, equalTo("value<inner>"));
+        }
+
+        @Test
+        void shouldMaskCdataValues() {
+            var output = invokeMaskXmlValue("<![CDATA[" + RAW_PLAIN + "]]>", null);
+
+            assertThat(output, equalTo("<![CDATA[" + masked(RAW_PLAIN) + "]]>"));
+        }
+
+        @Test
+        void shouldMaskUsingOverride() {
+            var override = newMaskOverride(P11MaskingProperties.MaskingStyle.LAST4, "#");
+
+            var output = invokeMaskXmlValue("1234567890", override);
+
+            assertThat(output, equalTo("######7890"));
+        }
+    }
+
+    @Nested
+    class DerivedFieldNames {
+        @Test
+        void shouldDeriveFromGettersAndBooleanGetters() {
+            assertAll(
+                    () -> assertThat(invokeDeriveFieldName("getEmail"), equalTo("email")),
+                    () -> assertThat(invokeDeriveFieldName("isActive"), equalTo("active")),
+                    () -> assertThat(invokeDeriveFieldName("getURL"), equalTo("uRL"))
+            );
+        }
+
+        @Test
+        void shouldReturnOriginalNameWhenNotGetter() {
+            assertAll(
+                    () -> assertThat(invokeDeriveFieldName("get"), equalTo("get")),
+                    () -> assertThat(invokeDeriveFieldName("is"), equalTo("is")),
+                    () -> assertThat(invokeDeriveFieldName("fetchValue"), equalTo("fetchValue"))
+            );
+        }
+    }
+
+    @Nested
+    class SoapPayloadMasking {
+        static Stream<SoapCase> soapCases() {
+            return Stream.of(
+                    new SoapCase(
+                            "simple tags",
+                            "<Envelope><email>" + RAW_EMAIL + "</email><phoneNumber>" + RAW_PHONE + "</phoneNumber></Envelope>",
+                            List.of("<email>" + MASKED_EMAIL + "</email>", "<phoneNumber>" + MASKED_PHONE + "</phoneNumber>"),
+                            List.of(RAW_EMAIL, RAW_PHONE)
+                    ),
+                    new SoapCase(
+                            "namespaced tags",
+                            "<soapenv:Envelope><ns:email>" + RAW_EMAIL + "</ns:email></soapenv:Envelope>",
+                            List.of("<ns:email>" + MASKED_EMAIL + "</ns:email>"),
+                            List.of(RAW_EMAIL)
+                    ),
+                    new SoapCase(
+                            "cdata tags",
+                            "<Envelope><email><![CDATA[" + RAW_EMAIL + "]]></email></Envelope>",
+                            List.of("<email><![CDATA[" + MASKED_EMAIL + "]]></email>"),
+                            List.of(RAW_EMAIL)
+                    )
+            );
+        }
+
+        @ParameterizedTest(name = "{0}")
+        @MethodSource("soapCases")
+        void shouldMaskSoapPayloads(SoapCase soapCase) {
+            var output = convert(soapCase.message());
+
+            assertMasked(output, soapCase.expected(), soapCase.unexpected());
         }
     }
 
