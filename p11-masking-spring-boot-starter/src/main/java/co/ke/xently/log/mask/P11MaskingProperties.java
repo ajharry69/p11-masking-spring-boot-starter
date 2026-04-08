@@ -37,6 +37,8 @@ public class P11MaskingProperties {
     private MaskingStyle maskStyle = MaskingStyle.FULL;
     @Builder.Default
     private String maskCharacter = "*";
+    @Builder.Default
+    private Json json = new Json();
 
     public List<String> getFields() {
         if (fields != null && !fields.isEmpty()) return fields;
@@ -52,6 +54,18 @@ public class P11MaskingProperties {
                 .filter(value -> value != null && !value.isBlank())
                 .map(value -> value.toLowerCase(Locale.ROOT))
                 .anyMatch(value -> value.equals(normalized));
+    }
+
+    public boolean isJsonMaskingEnabled() {
+        return json != null && json.isEnabled();
+    }
+
+    @Setter
+    @Getter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class Json {
+        private boolean enabled = false;
     }
 
     public enum MaskingStyle {DEFAULT, FULL, PARTIAL, LAST4}

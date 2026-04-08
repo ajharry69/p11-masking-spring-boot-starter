@@ -9,7 +9,7 @@ A spring boot starter and demo showing sensitive data masking in logs/JSON.
 
 ## Modules
 
-- `p11-masking-spring-boot-starter`: Auto-configured Jackson module masking configured string fields.
+- `p11-masking-spring-boot-starter`: Log masking plus an opt-in Jackson module for JSON field masking.
 - `books-api-demo`: Minimal CRUD API demonstrating the starter.
 
 ## Quick start
@@ -41,6 +41,8 @@ p11:
     enabled: true
     mask-style: PARTIAL  # FULL | PARTIAL | LAST4
     mask-character: "*"
+    json:
+      enabled: true # optional, default false
     fields:
       - email
       - phoneNumber
@@ -56,6 +58,18 @@ if `p11.masking.fields` is not provided, and any configured fields override the 
 Default fields:
 `password`, `passcode`, `secret`, `token`, `accessToken`, `refreshToken`, `ssn`,
 `creditCard`, `cardNumber`, `email`, `phone`, `phoneNumber`, `accountNumber`, `pin`.
+
+## JSON masking (opt-in)
+
+JSON serialization masking is disabled by default. Enable it only when you want
+API responses or other non-log JSON to be masked.
+
+```yaml
+p11:
+  masking:
+    json:
+      enabled: true
+```
 
 ## Annotation-based masking
 
@@ -76,6 +90,6 @@ public record UserDto(
 ## Highlights
 
 - Testcontainers: Oracle FreeDB container wired via `@ServiceConnection` for repeatable integration tests.
-- Spring Boot 4 + Jackson 3: Contextual `String` serializer applies masking to configured or annotated fields.
+- Spring Boot 4 + Jackson 3: Optional contextual `String` serializer applies masking to configured or annotated fields.
 - Logback: `%msg` converter masks sensitive values in log output without manual `ObjectMapper` calls.
 - Java 21: Records for DTOs and modern toolchain.

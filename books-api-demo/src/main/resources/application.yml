@@ -17,6 +17,8 @@ p11:
     enabled: true
     mask-style: PARTIAL
     mask-character: "*"
+    json:
+      enabled: true
     fields:
       - email
       - phoneNumber
