@@ -2,6 +2,7 @@
 
 ![Maven Central Version](https://img.shields.io/maven-central/v/ke.co.xently/p11-masking-spring-boot-starter)
 [![Java CI with Maven](https://github.com/xently/p11-masking-spring-boot-starter/actions/workflows/maven.yml/badge.svg)](https://github.com/xently/p11-masking-spring-boot-starter/actions/workflows/maven.yml)
+[![Maven Central Publish](https://github.com/xently/p11-masking-spring-boot-starter/actions/workflows/maven-publish.yml/badge.svg)](https://github.com/xently/p11-masking-spring-boot-starter/actions/workflows/maven-publish.yml)
 
 A spring boot starter and demo showing sensitive data masking in logs/JSON.
 
