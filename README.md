@@ -1,5 +1,7 @@
 # P11 Masking Spring Boot Starter + Books API Demo
 
+![Maven Central Version](https://img.shields.io/maven-central/v/ke.co.xently/p11-masking-spring-boot-starter)
+
 A spring boot starter and demo showing sensitive data masking in logs/JSON.
 
 - Spring Boot: 4.x (Jackson 3 `tools.jackson.*`)
