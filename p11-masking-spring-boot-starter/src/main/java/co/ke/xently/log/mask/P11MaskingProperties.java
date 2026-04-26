@@ -43,7 +43,7 @@ public class P11MaskingProperties {
     private Json json = new Json();
 
     @NonNull
-    public List<String> getFields() {
+    public List<@NonNull String> getFields() {
         if (fields != null && !fields.isEmpty()) return fields;
         return DEFAULT_FIELDS;
     }
@@ -59,7 +59,7 @@ public class P11MaskingProperties {
         if (effective.isEmpty()) return false;
         var normalized = name.toLowerCase(Locale.ROOT);
         return effective.stream()
-                .filter(value -> value != null && !value.isBlank())
+                .filter(value -> !value.isBlank())
                 .map(value -> value.toLowerCase(Locale.ROOT))
                 .anyMatch(value -> value.equals(normalized));
     }

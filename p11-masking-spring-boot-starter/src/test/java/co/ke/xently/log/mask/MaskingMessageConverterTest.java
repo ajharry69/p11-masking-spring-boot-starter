@@ -33,7 +33,6 @@ class MaskingMessageConverterTest {
     private static final String RAW_PLAIN = "plainvalue";
     private static final String RAW_SHORT_PHONE = "12345";
     private static final String MASKED_EMAIL = "j*******@example.com";
-    private static final String MASKED_PHONE = "0*********";
 
     private final P11MaskingProperties properties = P11MaskingProperties.builder()
             .maskStyle(MaskingStyle.PARTIAL)
@@ -416,8 +415,7 @@ class MaskingMessageConverterTest {
     class PatternMasking {
         static Stream<PatternCase> patternCases() {
             return Stream.of(
-                    new PatternCase("email pattern", RAW_EMAIL),
-                    new PatternCase("phone pattern", RAW_PHONE)
+                    new PatternCase("email pattern", RAW_EMAIL)
             );
         }
 
@@ -555,7 +553,7 @@ class MaskingMessageConverterTest {
                     new SoapCase(
                             "simple tags",
                             "<Envelope><email>" + RAW_EMAIL + "</email><phoneNumber>" + RAW_PHONE + "</phoneNumber></Envelope>",
-                            List.of("<email>" + MASKED_EMAIL + "</email>", "<phoneNumber>" + MASKED_PHONE + "</phoneNumber>"),
+                            List.of("<email>" + MASKED_EMAIL + "</email>", "<phoneNumber>0*********</phoneNumber>"),
                             List.of(RAW_EMAIL, RAW_PHONE)
                     ),
                     new SoapCase(

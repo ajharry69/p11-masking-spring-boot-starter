@@ -18,9 +18,6 @@ public class MaskingMessageConverter extends ClassicConverter {
             "[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}",
             Pattern.CASE_INSENSITIVE
     );
-    private static final Pattern PHONE_PATTERN = Pattern.compile(
-            "\\b\\+?\\d{1,3}?[-.\\s]?\\(?\\d{2,4}\\)?[-.\\s]?\\d{3,4}[-.\\s]?\\d{4}\\b"
-    );
     private static final Pattern CARD_PATTERN = Pattern.compile(
             "\\b(?:\\d[ -]*?){13,19}\\b"
     );
@@ -199,7 +196,7 @@ public class MaskingMessageConverter extends ClassicConverter {
 
         var masked = message;
         for (var field : fields) {
-            if (field == null || field.isBlank()) continue;
+            if (field.isBlank()) continue;
             var override = overrides.get(normalize(field));
             masked = maskFieldOccurrences(masked, field, override);
         }
@@ -208,11 +205,10 @@ public class MaskingMessageConverter extends ClassicConverter {
 
     private String applyXmlMasking(String message, Map<String, MaskOverride> overrides) {
         var fields = properties.getFields();
-        if (fields.isEmpty()) return message;
 
         var masked = message;
         for (var field : fields) {
-            if (field == null || field.isBlank()) continue;
+            if (field.isBlank()) continue;
             var override = overrides.get(normalize(field));
             masked = maskXmlElement(masked, field, override);
         }
@@ -240,21 +236,19 @@ public class MaskingMessageConverter extends ClassicConverter {
 
     private String maskXmlValue(String value, MaskOverride override) {
         if (value == null || value.isBlank()) return value;
+        var maskingStyle = override != null ? override.style : null;
+        var activeMaskCharacter = override != null ? override.maskCharacter : null;
         if (value.startsWith("<![CDATA[") && value.endsWith("]]>") && value.length() > 12) {
             var inner = value.substring(9, value.length() - 3);
             var maskedInner = maskingService.mask(
                     inner,
-                    override != null ? override.style : null,
-                    override != null ? override.maskCharacter : null
+                    maskingStyle,
+                    activeMaskCharacter
             );
             return "<![CDATA[" + maskedInner + "]]>";
         }
         if (value.indexOf('<') >= 0) return value;
-        return maskingService.mask(
-                value,
-                override != null ? override.style : null,
-                override != null ? override.maskCharacter : null
-        );
+        return maskingService.mask(value, maskingStyle, activeMaskCharacter);
     }
 
     private String maskFieldOccurrences(String message, String field, MaskOverride override) {
@@ -292,7 +286,6 @@ public class MaskingMessageConverter extends ClassicConverter {
     private String applyPatternMasking(String message) {
         var masked = message;
         masked = maskMatches(EMAIL_PATTERN, masked);
-        masked = maskMatches(PHONE_PATTERN, masked);
         masked = maskMatches(CARD_PATTERN, masked);
         for (var pattern : properties.getPatterns()) {
             if (pattern.isBlank()) continue;
