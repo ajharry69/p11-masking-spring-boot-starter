@@ -20,7 +20,7 @@ class MaskingServiceTest {
     @MethodSource
     void shouldHandleNullAndEmptySafely(String input) {
         var props = P11MaskingProperties.builder()
-                .maskStyle(P11MaskingProperties.MaskingStyle.PARTIAL)
+                .maskStyle(MaskingStyle.PARTIAL)
                 .maskCharacter("*")
                 .build();
         var service = new MaskingService(props);
@@ -40,7 +40,7 @@ class MaskingServiceTest {
         })
         void shouldPartiallyMaskInputs(String input, String expected) {
             var props = P11MaskingProperties.builder()
-                    .maskStyle(P11MaskingProperties.MaskingStyle.PARTIAL)
+                    .maskStyle(MaskingStyle.PARTIAL)
                     .maskCharacter("*")
                     .build();
             var service = new MaskingService(props);
@@ -59,7 +59,7 @@ class MaskingServiceTest {
         })
         void shouldFullyMaskWithFixedLength(String input, String expected) {
             var props = P11MaskingProperties.builder()
-                    .maskStyle(P11MaskingProperties.MaskingStyle.FULL)
+                    .maskStyle(MaskingStyle.FULL)
                     .maskCharacter("*")
                     .build();
             var service = new MaskingService(props);
@@ -82,7 +82,7 @@ class MaskingServiceTest {
         })
         void shouldMaskKeepingLast4Visible(String input, String expected) {
             var props = P11MaskingProperties.builder()
-                    .maskStyle(P11MaskingProperties.MaskingStyle.LAST4)
+                    .maskStyle(MaskingStyle.LAST4)
                     .maskCharacter("*")
                     .build();
             var service = new MaskingService(props);
@@ -102,12 +102,12 @@ class MaskingServiceTest {
         })
         void shouldOverrideStyleAndMaskCharacter(String input, String expected) {
             var props = P11MaskingProperties.builder()
-                    .maskStyle(P11MaskingProperties.MaskingStyle.PARTIAL)
+                    .maskStyle(MaskingStyle.PARTIAL)
                     .maskCharacter("*")
                     .build();
             var service = new MaskingService(props);
 
-            var actual = service.mask(input, P11MaskingProperties.MaskingStyle.LAST4, "#");
+            var actual = service.mask(input, MaskingStyle.LAST4, "#");
 
             assertThat(actual, equalTo(expected));
         }

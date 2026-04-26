@@ -38,7 +38,7 @@ class MaskingMessageConverterTest {
     private static final String MASKED_PHONE = "0*********";
 
     private final P11MaskingProperties properties = P11MaskingProperties.builder()
-            .maskStyle(P11MaskingProperties.MaskingStyle.PARTIAL)
+            .maskStyle(MaskingStyle.PARTIAL)
             .maskCharacter("*")
             .fields(List.of("email", "phoneNumber"))
             .build();
@@ -79,7 +79,7 @@ class MaskingMessageConverterTest {
         return maskingService.mask(raw, null, null);
     }
 
-    private String masked(String raw, P11MaskingProperties.MaskingStyle style, String maskCharacter) {
+    private String masked(String raw, MaskingStyle style, String maskCharacter) {
         return maskingService.mask(raw, style, maskCharacter);
     }
 
@@ -116,10 +116,10 @@ class MaskingMessageConverterTest {
         }
     }
 
-    private Object newMaskOverride(P11MaskingProperties.MaskingStyle style, String maskCharacter) {
+    private Object newMaskOverride(MaskingStyle style, String maskCharacter) {
         try {
             Constructor<?> constructor = maskOverrideClass()
-                    .getDeclaredConstructor(P11MaskingProperties.MaskingStyle.class, String.class);
+                    .getDeclaredConstructor(MaskingStyle.class, String.class);
             constructor.setAccessible(true);
             return constructor.newInstance(style, maskCharacter);
         } catch (Exception ex) {
@@ -148,7 +148,7 @@ class MaskingMessageConverterTest {
     }
 
     private record OverrideDto(
-            @Mask(style = P11MaskingProperties.MaskingStyle.LAST4, maskCharacter = "#") String phoneNumber
+            @Mask(style = MaskingStyle.LAST4, maskCharacter = "#") String phoneNumber
     ) {
     }
 
@@ -159,7 +159,7 @@ class MaskingMessageConverterTest {
             this.token = token;
         }
 
-        @Mask(style = P11MaskingProperties.MaskingStyle.FULL, maskCharacter = "#")
+        @Mask(style = MaskingStyle.FULL, maskCharacter = "#")
         public String getToken() {
             return token;
         }
@@ -345,7 +345,7 @@ class MaskingMessageConverterTest {
             var override = new OverrideDto("1234567890");
             var message = "phoneNumber=5555555555";
 
-            var maskedValue = masked("5555555555", P11MaskingProperties.MaskingStyle.LAST4, "#");
+            var maskedValue = masked("5555555555", MaskingStyle.LAST4, "#");
             var defaultMasked = masked("5555555555");
 
             var masked = convert(message, override);
@@ -476,7 +476,7 @@ class MaskingMessageConverterTest {
 
         @Test
         void shouldMaskUsingOverride() {
-            var override = newMaskOverride(P11MaskingProperties.MaskingStyle.LAST4, "#");
+            var override = newMaskOverride(MaskingStyle.LAST4, "#");
 
             var output = invokeMaskXmlValue("1234567890", override);
 
@@ -583,7 +583,7 @@ class MaskingMessageConverterTest {
             var holder = new MethodMasked(RAW_TOKEN);
 
             var output = convert("payload={}", holder);
-            var expected = masked(RAW_TOKEN, P11MaskingProperties.MaskingStyle.FULL, "#");
+            var expected = masked(RAW_TOKEN, MaskingStyle.FULL, "#");
 
             assertMasked(output, List.of("token=" + expected), List.of(RAW_TOKEN));
         }

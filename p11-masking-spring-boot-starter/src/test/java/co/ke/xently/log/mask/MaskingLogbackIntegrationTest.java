@@ -62,7 +62,7 @@ class MaskingLogbackIntegrationTest {
     }
 
     private record OverrideDto(
-            @Mask(style = P11MaskingProperties.MaskingStyle.LAST4, maskCharacter = "#") String phoneNumber
+            @Mask(style = MaskingStyle.LAST4, maskCharacter = "#") String phoneNumber
     ) {
     }
 

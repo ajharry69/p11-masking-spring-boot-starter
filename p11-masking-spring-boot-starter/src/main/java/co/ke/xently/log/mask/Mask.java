@@ -6,7 +6,7 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER, ElementType.RECORD_COMPONENT})
 public @interface Mask {
-    P11MaskingProperties.MaskingStyle style() default P11MaskingProperties.MaskingStyle.DEFAULT;
+    MaskingStyle style() default MaskingStyle.DEFAULT;
 
     String maskCharacter() default "";
 }

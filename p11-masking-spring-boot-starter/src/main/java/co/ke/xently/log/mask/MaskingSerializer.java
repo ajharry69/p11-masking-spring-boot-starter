@@ -12,7 +12,7 @@ public class MaskingSerializer extends StdSerializer<Object> {
 
     private final MaskingService maskingService;
     private final P11MaskingProperties properties;
-    private final P11MaskingProperties.MaskingStyle styleOverride;
+    private final MaskingStyle styleOverride;
     private final String maskCharacterOverride;
 
     public MaskingSerializer(MaskingService maskingService, P11MaskingProperties properties) {
@@ -21,7 +21,7 @@ public class MaskingSerializer extends StdSerializer<Object> {
 
     private MaskingSerializer(MaskingService maskingService,
                               P11MaskingProperties properties,
-                              P11MaskingProperties.MaskingStyle styleOverride,
+                              MaskingStyle styleOverride,
                               String maskCharacterOverride) {
         super(Object.class);
         this.maskingService = maskingService;

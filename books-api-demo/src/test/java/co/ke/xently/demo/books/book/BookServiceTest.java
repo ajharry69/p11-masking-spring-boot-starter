@@ -9,6 +9,7 @@ import ch.qos.logback.core.ConsoleAppender;
 import co.ke.xently.demo.books.book.exceptions.BookNotFoundException;
 import co.ke.xently.log.mask.MaskingLogbackInitializer;
 import co.ke.xently.log.mask.MaskingService;
+import co.ke.xently.log.mask.MaskingStyle;
 import co.ke.xently.log.mask.P11MaskingProperties;
 import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,7 +50,7 @@ class BookServiceTest {
     private static void applyLogMasking() {
         var props = P11MaskingProperties.builder()
                 .enabled(true)
-                .maskStyle(P11MaskingProperties.MaskingStyle.PARTIAL)
+                .maskStyle(MaskingStyle.PARTIAL)
                 .maskCharacter("*")
                 .fields(List.of("email", "phoneNumber"))
                 .build();

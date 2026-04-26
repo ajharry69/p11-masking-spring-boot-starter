@@ -70,7 +70,7 @@ class MaskingIntegrationTest {
 
     private record AnnotatedOverrideDto(
             String title,
-            @Mask(style = P11MaskingProperties.MaskingStyle.LAST4, maskCharacter = "#") String phoneNumber
+            @Mask(style = MaskingStyle.LAST4, maskCharacter = "#") String phoneNumber
     ) {
     }
 }

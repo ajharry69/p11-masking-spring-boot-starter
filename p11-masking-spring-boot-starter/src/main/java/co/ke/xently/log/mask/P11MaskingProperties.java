@@ -68,5 +68,4 @@ public class P11MaskingProperties {
         private boolean enabled = false;
     }
 
-    public enum MaskingStyle {DEFAULT, FULL, PARTIAL, LAST4}
 }

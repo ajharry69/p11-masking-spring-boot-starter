@@ -347,6 +347,6 @@ public class MaskingMessageConverter extends ClassicConverter {
         private final Map<String, MaskOverride> fieldOverrides = new LinkedHashMap<>();
     }
 
-    private record MaskOverride(P11MaskingProperties.MaskingStyle style, String maskCharacter) {
+    private record MaskOverride(MaskingStyle style, String maskCharacter) {
     }
 }

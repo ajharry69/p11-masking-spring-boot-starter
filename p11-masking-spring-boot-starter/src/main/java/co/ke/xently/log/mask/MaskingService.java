@@ -11,7 +11,7 @@ public class MaskingService {
         return mask(input, null, null);
     }
 
-    public String mask(String input, P11MaskingProperties.MaskingStyle styleOverride, String maskCharacterOverride) {
+    public String mask(String input, MaskingStyle styleOverride, String maskCharacterOverride) {
         if (!properties.isEnabled() || !StringUtils.hasText(input)) return input;
 
         var ch = resolveMaskCharacter(maskCharacterOverride);
@@ -35,11 +35,11 @@ public class MaskingService {
         };
     }
 
-    private P11MaskingProperties.MaskingStyle resolveStyle(P11MaskingProperties.MaskingStyle styleOverride) {
-        var override = styleOverride == null || styleOverride == P11MaskingProperties.MaskingStyle.DEFAULT;
+    private MaskingStyle resolveStyle(MaskingStyle styleOverride) {
+        var override = styleOverride == null || styleOverride == MaskingStyle.DEFAULT;
         var resolved = override ? properties.getMaskStyle() : styleOverride;
-        return resolved == P11MaskingProperties.MaskingStyle.DEFAULT
-                ? P11MaskingProperties.MaskingStyle.FULL
+        return resolved == MaskingStyle.DEFAULT
+                ? MaskingStyle.FULL
                 : resolved;
     }
 
