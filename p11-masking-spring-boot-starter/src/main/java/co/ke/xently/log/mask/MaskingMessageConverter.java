@@ -296,14 +296,14 @@ public class MaskingMessageConverter extends ClassicConverter {
 
     private String maskMatches(Pattern pattern, String message) {
         var matcher = pattern.matcher(message);
-        var buffer = new StringBuilder();
+        var sb = new StringBuilder();
         while (matcher.find()) {
             var value = matcher.group();
             var masked = maskingService.mask(value, null, null);
-            matcher.appendReplacement(buffer, Matcher.quoteReplacement(masked));
+            matcher.appendReplacement(sb, Matcher.quoteReplacement(masked));
         }
-        matcher.appendTail(buffer);
-        return buffer.toString();
+        matcher.appendTail(sb);
+        return sb.toString();
     }
 
     private void addReplacement(LinkedHashMap<String, String> replacements, String raw, String masked) {
