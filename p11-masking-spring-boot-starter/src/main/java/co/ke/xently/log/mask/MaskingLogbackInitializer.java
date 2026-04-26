@@ -12,11 +12,11 @@ import java.util.IdentityHashMap;
 
 @AllArgsConstructor
 public class MaskingLogbackInitializer {
-    private final MaskingService maskingService;
+    private final MaskingService service;
     private final P11MaskingProperties properties;
 
     public void initialize() {
-        MaskingMessageConverter.initialize(maskingService, properties);
+        MaskingMessageConverter.initialize(service, properties);
         var loggerFactory = LoggerFactory.getILoggerFactory();
         if (loggerFactory instanceof LoggerContext context) {
             registerConverter("m");
