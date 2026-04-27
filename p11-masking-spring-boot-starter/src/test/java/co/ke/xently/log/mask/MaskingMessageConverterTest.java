@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.lang.reflect.Constructor;
@@ -445,8 +446,85 @@ class MaskingMessageConverterTest {
             );
         }
 
-        @Test
-        void shouldMaskCustomPatterns() {
+        static Stream<Arguments> shouldMaskCustomPatterns() {
+            return Stream.of(
+                    Arguments.of(
+                            // language=JSON
+                            """
+                                    {
+                                      "access_token": "eyJleHAiOjE3NzcyMDUzODgsImlhdCI6MTc3NzIwNTA4",
+                                      "expires_in": 300,
+                                      "refresh_expires_in": 1800,
+                                      "refresh_token": "eyJhbGciOiJIUzUxMiIsInR5cCIgOiAiSldUIiwia2l",
+                                      "token_type": "Bearer",
+                                      "id_token": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6",
+                                      "not-before-policy": 0,
+                                      "session_state": "ta15irl9lXT7Vx3K96i-TLgi",
+                                      "scope": "openid"
+                                    }""",
+                            """
+                                    {
+                                      "access_token": "********",
+                                      "expires_in": 300,
+                                      "refresh_expires_in": 1800,
+                                      "refresh_token": "********",
+                                      "token_type": "Bearer",
+                                      "id_token": "********",
+                                      "not-before-policy": 0,
+                                      "session_state": "ta15irl9lXT7Vx3K96i-TLgi",
+                                      "scope": "openid"
+                                    }"""
+                    ),
+                    Arguments.of(
+                            """
+                                    ======================================================START RESPONSE======================================================
+                                    [URI]: https://example.com/oauth2/token
+                                    [METHOD]: POST
+                                    [STATUS CODE]: 200 OK
+                                    [HEADERS]:
+                                       Server: nginx/1.20.1
+                                       Date: Mon, 27 Apr 2026 10:25:39 GMT
+                                       Content-Type: application/json
+                                       Transfer-Encoding: chunked
+                                       Connection: keep-alive
+                                       Vary: Accept-Encoding
+                                       X-WSO2-TraceId: 0b0986de-6d1e-4702-ae5e-f654bd671f33
+                                       X-Frame-Options: DENY
+                                       X-Content-Type-Options: nosniff
+                                       Cache-Control: no-store
+                                       Pragma: no-cache
+                                    [BODY]:
+                                    {"access_token":"eyJ4NXQiOiJNb","scope":"default","token_type":"Bearer","expires_in":3600}
+                                    =======================================================END RESPONSE=======================================================
+                                    """,
+                            """
+                                    ======================================================START RESPONSE======================================================
+                                    [URI]: https://example.com/oauth2/token
+                                    [METHOD]: POST
+                                    [STATUS CODE]: 200 OK
+                                    [HEADERS]:
+                                       Server: nginx/1.20.1
+                                       Date: Mon, 27 Apr 2026 10:25:39 GMT
+                                       Content-Type: application/json
+                                       Transfer-Encoding: chunked
+                                       Connection: keep-alive
+                                       Vary: Accept-Encoding
+                                       X-WSO2-TraceId: 0b0986de-6d1e-4702-ae5e-f654bd671f33
+                                       X-Frame-Options: DENY
+                                       X-Content-Type-Options: nosniff
+                                       Cache-Control: no-store
+                                       Pragma: no-cache
+                                    [BODY]:
+                                    {"access_token":"********","scope":"default","token_type":"Bearer","expires_in":3600}
+                                    =======================================================END RESPONSE=======================================================
+                                    """
+                    )
+            );
+        }
+
+        @ParameterizedTest
+        @MethodSource
+        void shouldMaskCustomPatterns(String message, String expectedMessage) {
             var customProperties = P11MaskingProperties.builder()
                     .patterns(List.of(Pattern.compile("""
                             "[a-z]+_token":\\s*"([^"]+)\"""").pattern()))
@@ -454,34 +532,9 @@ class MaskingMessageConverterTest {
             var customService = new MaskingService(customProperties);
             MaskingMessageConverter.initialize(customService, customProperties);
 
-            // language=JSON
-            var message = """
-                    {
-                      "access_token": "eyJleHAiOjE3NzcyMDUzODgsImlhdCI6MTc3NzIwNTA4",
-                      "expires_in": 300,
-                      "refresh_expires_in": 1800,
-                      "refresh_token": "eyJhbGciOiJIUzUxMiIsInR5cCIgOiAiSldUIiwia2l",
-                      "token_type": "Bearer",
-                      "id_token": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6",
-                      "not-before-policy": 0,
-                      "session_state": "ta15irl9lXT7Vx3K96i-TLgi",
-                      "scope": "openid"
-                    }""";
             var output = convert(message);
 
-            assertThat(
-                    output,
-                    allOf(
-                            containsString("""
-                                    "access_token": "********\""""),
-                            containsString("""
-                                    "refresh_token": "********\""""),
-                            containsString("""
-                                    "id_token": "********\""""),
-                            containsString("""
-                                    "session_state": "ta15irl9lXT7Vx3K96i-TLgi\"""")
-                    )
-            );
+            assertThat(output, equalTo(expectedMessage));
         }
     }
 
