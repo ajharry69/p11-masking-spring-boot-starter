@@ -34,7 +34,7 @@ class MaskingJsonDisabledIntegrationTest {
                 () -> assertThat(json, containsString("""
                         "phoneNumber":"1234567890\"""")),
                 () -> assertThat(json, not(containsString("t***@test.com"))),
-                () -> assertThat(json, not(containsString("0*********")))
+                () -> assertThat(json, not(containsString("0********")))
         );
     }
 
@@ -48,7 +48,7 @@ class MaskingJsonDisabledIntegrationTest {
                 () -> assertThat(json, containsString("""
                         "ssn":"1234567890\"""")),
                 () -> assertThat(json, not(containsString("""
-                        "ssn":"1*********\"""")))
+                        "ssn":"1********\"""")))
         );
     }
 

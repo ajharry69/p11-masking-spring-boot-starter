@@ -77,14 +77,14 @@ class MaskingLogbackIntegrationTest {
                             "record payload",
                             () -> log.info("mask-test {}", record),
                             "mask-test",
-                            List.of("email=j*******@example.com", "phoneNumber=0*********"),
+                            List.of("email=j********@example.com", "phoneNumber=0********"),
                             List.of("john.doe@example.com", "0712345678")
                     ),
                     new LogCase(
                             "annotation override",
                             () -> log.info("mask-override {}", override),
                             "mask-override",
-                            List.of("phoneNumber=######7890"),
+                            List.of("phoneNumber=########7890"),
                             List.of("1234567890")
                     )
             );

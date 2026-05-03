@@ -33,7 +33,7 @@ class MaskingMessageConverterTest {
     private static final String RAW_TOKEN = "secret-token";
     private static final String RAW_PLAIN = "plainvalue";
     private static final String RAW_SHORT_PHONE = "12345";
-    private static final String MASKED_EMAIL = "j*******@example.com";
+    private static final String MASKED_EMAIL = "j********@example.com";
 
     private final P11MaskingProperties properties = P11MaskingProperties.builder()
             .maskStyle(MaskingStyle.PARTIAL)
@@ -304,21 +304,21 @@ class MaskingMessageConverterTest {
                             "email field",
                             "email={}",
                             new Object[]{RAW_EMAIL},
-                            List.of("email=j*******@example.com"),
+                            List.of("email=j********@example.com"),
                             List.of(RAW_EMAIL)
                     ),
                     new LogCase(
                             "map payload",
                             "payload={}",
                             new Object[]{map},
-                            List.of("email=j*******@example.com", "phoneNumber=0*********"),
+                            List.of("email=j********@example.com", "phoneNumber=0********"),
                             List.of(RAW_EMAIL, RAW_PHONE)
                     ),
                     new LogCase(
                             "record payload",
                             "payload={}",
                             new Object[]{record},
-                            List.of("email=j*******@example.com", "phoneNumber=0*********"),
+                            List.of("email=j********@example.com", "phoneNumber=0********"),
                             List.of(RAW_EMAIL, RAW_PHONE)
                     )
             );
@@ -341,7 +341,7 @@ class MaskingMessageConverterTest {
 
             var masked = convert("payload={}", dto);
 
-            assertMasked(masked, List.of("phoneNumber=######7890"), List.of("1234567890"));
+            assertMasked(masked, List.of("phoneNumber=########7890"), List.of("1234567890"));
         }
 
         @Test
@@ -575,7 +575,7 @@ class MaskingMessageConverterTest {
 
             var output = invokeMaskXmlValue("1234567890", override);
 
-            assertThat(output, equalTo("######7890"));
+            assertThat(output, equalTo("########7890"));
         }
     }
 
@@ -607,7 +607,7 @@ class MaskingMessageConverterTest {
                     new SoapCase(
                             "simple tags",
                             "<Envelope><email>" + RAW_EMAIL + "</email><phoneNumber>" + RAW_PHONE + "</phoneNumber></Envelope>",
-                            List.of("<email>" + MASKED_EMAIL + "</email>", "<phoneNumber>0*********</phoneNumber>"),
+                            List.of("<email>" + MASKED_EMAIL + "</email>", "<phoneNumber>0********</phoneNumber>"),
                             List.of(RAW_EMAIL, RAW_PHONE)
                     ),
                     new SoapCase(
@@ -639,8 +639,8 @@ class MaskingMessageConverterTest {
         static Stream<CollectionCase> collectionCases() {
             var record = new LogDto("Title", RAW_EMAIL, RAW_PHONE);
             var expected = List.of(
-                    "email=" + "j*******@example.com",
-                    "phoneNumber=0*********"
+                    "email=" + "j********@example.com",
+                    "phoneNumber=0********"
             );
             var unexpected = List.of(RAW_EMAIL, RAW_PHONE);
 

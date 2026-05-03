@@ -34,9 +34,9 @@ class MaskingServiceTest {
     class PartialMasking {
         @ParameterizedTest(name = "shouldPartiallyMaskEmail: {0} -> {1}")
         @CsvSource({
-                "john.doe@example.com, j*******@example.com",
+                "john.doe@example.com, j********@example.com",
                 "a@b.com, a@b.com", // too short to mask username part safely
-                "0712345678, 0*********"
+                "0712345678, 0********"
         })
         void shouldPartiallyMaskInputs(String input, String expected) {
             var props = P11MaskingProperties.builder()
@@ -74,11 +74,11 @@ class MaskingServiceTest {
     class Last4Masking {
         @ParameterizedTest(name = "shouldMaskLast4: {0} -> {1}")
         @CsvSource({
-                "1234567890, ******7890",
-                "4111111111111111, ************1111",
-                "123, ***", // < 4
-                "1234, ****", // == 4
-                "12345, *2345" // > 4
+                "1234567890, ********7890",
+                "4111111111111111, ********1111",
+                "123, ********", // < 4
+                "1234, ********", // == 4
+                "12345, ********2345" // > 4
         })
         void shouldMaskKeepingLast4Visible(String input, String expected) {
             var props = P11MaskingProperties.builder()
@@ -97,8 +97,8 @@ class MaskingServiceTest {
     class Overrides {
         @ParameterizedTest(name = "shouldOverrideStyleAndChar: {0} -> {1}")
         @CsvSource({
-                "1234567890, ######7890",
-                "1234, ####"
+                "1234567890, ########7890",
+                "1234, ########"
         })
         void shouldOverrideStyleAndMaskCharacter(String input, String expected) {
             var props = P11MaskingProperties.builder()

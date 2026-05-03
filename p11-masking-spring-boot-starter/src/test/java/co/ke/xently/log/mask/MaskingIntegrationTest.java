@@ -30,7 +30,7 @@ class MaskingIntegrationTest {
 
         assertAll(
                 () -> assertThat(json, containsString("""
-                        "email":"t***@test.com\"""")),
+                        "email":"t********@test.com\"""")),
                 () -> assertThat(json, containsString("""
                         "title":"Title\""""))
         );
@@ -43,8 +43,10 @@ class MaskingIntegrationTest {
         var json = objectMapper.writeValueAsString(dto);
 
         assertAll(
-                () -> assertThat(json, containsString("\"ssn\":\"1*********\"")),
-                () -> assertThat(json, containsString("\"title\":\"Title\""))
+                () -> assertThat(json, containsString("""
+                        "ssn":"1********\"""")),
+                () -> assertThat(json, containsString("""
+                        "title":"Title\""""))
         );
     }
 
@@ -56,7 +58,7 @@ class MaskingIntegrationTest {
 
         assertAll(
                 () -> assertThat(json, containsString("""
-                        "phoneNumber":"######7890\"""")),
+                        "phoneNumber":"########7890\"""")),
                 () -> assertThat(json, containsString("""
                         "title":"Title\""""))
         );

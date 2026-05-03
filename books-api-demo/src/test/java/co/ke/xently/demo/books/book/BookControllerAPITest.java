@@ -86,14 +86,14 @@ class BookControllerAPITest {
                 .body("title", equalTo("Clean Architecture"))
                 .body("author", equalTo("Robert Martin"))
                 .body("email", equalTo("u********@example.com"))
-                .body("phoneNumber", equalTo("0*********"));
+                .body("phoneNumber", equalTo("0********"));
 
         var line = firstLineContaining(output.getOut(), "Creating book:");
         assertAll(
                 () -> assertThat(line, not(emptyString())),
                 () -> assertMasked(line,
                         "u********@example.com",
-                        "0*********",
+                        "0********",
                         "uncle.bob@example.com",
                         "0712345678"
                 )
@@ -120,8 +120,8 @@ class BookControllerAPITest {
                 .when().put("/api/v1/books/{id}", id)
                 .then().statusCode(200)
                 .body("title", equalTo("New"))
-                .body("email", equalTo("n**@test.com"))
-                .body("phoneNumber", equalTo("0*********"));
+                .body("email", equalTo("n********@test.com"))
+                .body("phoneNumber", equalTo("0********"));
 
         given().when().delete("/api/v1/books/{id}", id).then().statusCode(204);
 
@@ -131,8 +131,8 @@ class BookControllerAPITest {
         assertAll(
                 () -> assertThat(line, not(emptyString())),
                 () -> assertMasked(line,
-                        "n**@test.com",
-                        "0*********",
+                        "n********@test.com",
+                        "0********",
                         "new@test.com",
                         "0711111111"
                 )

@@ -42,8 +42,8 @@ import static org.mockito.Mockito.when;
 class BookServiceTest {
     private static final String RAW_EMAIL = "john.doe@example.com";
     private static final String RAW_PHONE = "0712345678";
-    private static final String MASKED_EMAIL = "j*******@example.com";
-    private static final String MASKED_PHONE = "0*********";
+    private static final String MASKED_EMAIL = "j********@example.com";
+    private static final String MASKED_PHONE = "0********";
     private final BookRepository bookRepository = Mockito.mock(BookRepository.class);
     private final BookService service = new BookService(bookRepository);
 
