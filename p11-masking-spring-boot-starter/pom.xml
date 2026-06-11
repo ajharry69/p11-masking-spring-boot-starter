@@ -25,6 +25,11 @@
             <artifactId>logback-classic</artifactId>
             <optional>true</optional>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+            <optional>true</optional>
+        </dependency>
 
         <!-- Optional: enable metadata generation for @ConfigurationProperties in developer IDEs -->
         <dependency>

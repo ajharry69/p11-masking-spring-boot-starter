@@ -1,13 +1,18 @@
 package co.ke.xently.log.mask;
 
+import co.ke.xently.log.mask.utils.validators.ValidRegexList;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.jspecify.annotations.NonNull;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
+@Validated
 @Setter
 @Getter
 @Builder
@@ -18,9 +23,13 @@ public class P11MaskingProperties {
     @Builder.Default
     private boolean enabled = true;
     private List<String> fields;
+    @ValidRegexList
     private List<String> patterns;
+    @NonNull
+    @NotNull
     @Builder.Default
     private MaskingStyle maskStyle = MaskingStyle.FULL;
+    @NotEmpty
     @Builder.Default
     private String maskCharacter = "*";
     @Builder.Default
