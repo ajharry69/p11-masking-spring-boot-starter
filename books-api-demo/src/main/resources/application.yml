@@ -22,3 +22,5 @@ p11:
     fields:
       - email
       - phoneNumber
+    log-forging:
+      replacement: "[LOG FORGED]"

@@ -2,11 +2,9 @@ package co.ke.xently.log.mask;
 
 import ch.qos.logback.classic.pattern.ClassicConverter;
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import co.ke.xently.log.mask.utils.LogSanitizer;
 
-import java.lang.reflect.Array;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.*;
 import java.time.temporal.Temporal;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -30,6 +28,22 @@ public class MaskingMessageConverter extends ClassicConverter {
         properties = props;
     }
 
+    private static String sanitizeForLogForging(Object arg) {
+        return LogSanitizer.sanitize(
+                arg,
+                properties.getLogForging().getReplacement(),
+                properties.getLogForging().isReplaceContinuousAtOnce()
+        );
+    }
+
+    private static void processForLogForging(MaskingContext context, Object value) {
+        var raw = String.valueOf(value);
+        var sanitized = sanitizeForLogForging(raw);
+        if (!raw.equals(sanitized)) {
+            context.replacements.put(raw, sanitized);
+        }
+    }
+
     @Override
     public String convert(ILoggingEvent event) {
         var message = event.getFormattedMessage();
@@ -40,6 +54,8 @@ public class MaskingMessageConverter extends ClassicConverter {
         var args = event.getArgumentArray();
         if (args != null) {
             for (var arg : args) {
+                if (arg == null) continue;
+                sanitizeForLogForging(context, arg.getClass(), arg);
                 inspectArgument(arg, context, 0);
             }
         }
@@ -92,6 +108,7 @@ public class MaskingMessageConverter extends ClassicConverter {
                 var accessor = component.getAccessor();
                 var value = accessor.invoke(arg);
                 var annotation = component.getAnnotation(Mask.class);
+                sanitizeForLogForging(context, component, value);
                 handleField(component.getName(), value, annotation, context, depth);
             } catch (Exception ignored) {
                 // Best-effort masking for logs.
@@ -117,6 +134,7 @@ public class MaskingMessageConverter extends ClassicConverter {
                     }
                     var value = field.get(arg);
                     var annotation = field.getAnnotation(Mask.class);
+                    sanitizeForLogForging(context, field, value);
                     handleField(field.getName(), value, annotation, context, depth);
                 } catch (Throwable ignored) {
                     // Best-effort masking for logs.
@@ -139,12 +157,16 @@ public class MaskingMessageConverter extends ClassicConverter {
             for (var method : methods) {
                 if (method.getParameterCount() != 0 || method.getReturnType() == void.class) continue;
                 var annotation = method.getAnnotation(Mask.class);
-                if (annotation == null) continue;
+                var hasNoLogForging = method.isAnnotationPresent(NoLogForging.class);
+                if (annotation == null && !hasNoLogForging) continue;
                 try {
                     if (!method.canAccess(arg)) {
                         method.setAccessible(true);
                     }
                     var value = method.invoke(arg);
+                    if (hasNoLogForging) {
+                        processForLogForging(context, value);
+                    }
                     var fieldName = deriveFieldName(method.getName());
                     handleField(fieldName, value, annotation, context, depth);
                 } catch (Throwable ignored) {
@@ -165,8 +187,8 @@ public class MaskingMessageConverter extends ClassicConverter {
             context.fieldOverrides.putIfAbsent(normalize(fieldName), override);
         }
 
+        var raw = String.valueOf(value);
         if (hasAnnotation || isConfigured) {
-            var raw = String.valueOf(value);
             if (!raw.isBlank()) {
                 var masked = maskingService.mask(
                         raw,
@@ -175,10 +197,25 @@ public class MaskingMessageConverter extends ClassicConverter {
                 );
                 addReplacement(context.replacements, raw, masked);
             }
+        } else if (argHasNoLogForging(value)) {
+            // Apply log forging prevention even if masking is not required
+            var sanitized = sanitizeForLogForging(raw);
+            addReplacement(context.replacements, raw, sanitized);
         }
 
         if (!isSimple(value)) {
             inspectArgument(value, context, depth + 1);
+        }
+    }
+
+    private boolean argHasNoLogForging(Object arg) {
+        if (arg == null) return false;
+        return arg.getClass().isAnnotationPresent(NoLogForging.class);
+    }
+
+    private void sanitizeForLogForging(MaskingContext context, AnnotatedElement element, Object value) {
+        if (element.isAnnotationPresent(NoLogForging.class)) {
+            processForLogForging(context, value);
         }
     }
 

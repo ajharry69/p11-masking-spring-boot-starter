@@ -45,6 +45,19 @@ class MaskingMessageConverterTest {
     private final LoggerContext loggerContext = new LoggerContext();
     private final Logger logger = loggerContext.getLogger(MaskingMessageConverterTest.class);
 
+    private static void setConverterState(MaskingService service, P11MaskingProperties props) {
+        try {
+            Field serviceField = MaskingMessageConverter.class.getDeclaredField("maskingService");
+            serviceField.setAccessible(true);
+            serviceField.set(null, service);
+            Field propsField = MaskingMessageConverter.class.getDeclaredField("properties");
+            propsField.setAccessible(true);
+            propsField.set(null, props);
+        } catch (Exception ex) {
+            throw new IllegalStateException("Failed to reset converter state", ex);
+        }
+    }
+
     @BeforeEach
     void setUp() {
         MaskingMessageConverter.initialize(maskingService, properties);
@@ -79,19 +92,6 @@ class MaskingMessageConverterTest {
 
     private String masked(String raw, MaskingStyle style, String maskCharacter) {
         return maskingService.mask(raw, style, maskCharacter);
-    }
-
-    private static void setConverterState(MaskingService service, P11MaskingProperties props) {
-        try {
-            Field serviceField = MaskingMessageConverter.class.getDeclaredField("maskingService");
-            serviceField.setAccessible(true);
-            serviceField.set(null, service);
-            Field propsField = MaskingMessageConverter.class.getDeclaredField("properties");
-            propsField.setAccessible(true);
-            propsField.set(null, props);
-        } catch (Exception ex) {
-            throw new IllegalStateException("Failed to reset converter state", ex);
-        }
     }
 
     private String invokeMaskXmlValue(String value, Object override) {
@@ -420,32 +420,6 @@ class MaskingMessageConverterTest {
             );
         }
 
-        @ParameterizedTest(name = "{0}")
-        @MethodSource("patternCases")
-        void shouldMaskPatternMatches(PatternCase patternCase) {
-            var message = "value=" + patternCase.rawValue();
-            var expected = masked(patternCase.rawValue());
-
-            var output = convert(message);
-
-            assertAll(
-                    () -> assertThat(output, containsString(expected)),
-                    () -> assertThat(output, not(containsString(patternCase.rawValue())))
-            );
-        }
-
-        @Test
-        void shouldMaskCardPatterns() {
-            var message = "value=" + RAW_CARD;
-
-            var output = convert(message);
-
-            assertAll(
-                    () -> assertThat(output, containsString("4****")),
-                    () -> assertThat(output, not(containsString(RAW_CARD)))
-            );
-        }
-
         static Stream<Arguments> shouldMaskCustomPatterns() {
             return Stream.of(
                     Arguments.of(
@@ -520,6 +494,32 @@ class MaskingMessageConverterTest {
                                     =======================================================END RESPONSE=======================================================
                                     """
                     )
+            );
+        }
+
+        @ParameterizedTest(name = "{0}")
+        @MethodSource("patternCases")
+        void shouldMaskPatternMatches(PatternCase patternCase) {
+            var message = "value=" + patternCase.rawValue();
+            var expected = masked(patternCase.rawValue());
+
+            var output = convert(message);
+
+            assertAll(
+                    () -> assertThat(output, containsString(expected)),
+                    () -> assertThat(output, not(containsString(patternCase.rawValue())))
+            );
+        }
+
+        @Test
+        void shouldMaskCardPatterns() {
+            var message = "value=" + RAW_CARD;
+
+            var output = convert(message);
+
+            assertAll(
+                    () -> assertThat(output, containsString("4****")),
+                    () -> assertThat(output, not(containsString(RAW_CARD)))
             );
         }
 
@@ -710,6 +710,60 @@ class MaskingMessageConverterTest {
             var output = convert("payload={}", new ThrowingGetter());
 
             assertMasked(output, List.of(masked(RAW_EMAIL)), List.of(RAW_EMAIL));
+        }
+    }
+
+    @Nested
+    class NoLogForgingSanitization {
+        @Test
+        void shouldSanitizeTypeLevelNoLogForgingUsingConfiguredReplacement() {
+            var dto = new NoLogForgingRecord("first\nsecond\rthird\tfourth", RAW_EMAIL);
+
+            var output = convert("payload={}", dto);
+
+            assertAll(
+                    () -> assertThat(output, containsString("first_second_third_fourth")),
+                    () -> assertThat(output, not(containsString("\n"))),
+                    () -> assertThat(output, not(containsString("\r"))),
+                    () -> assertThat(output, not(containsString("\t")))
+            );
+        }
+
+        @Test
+        void shouldSanitizeFieldLevelNoLogForgingUsingConfiguredReplacement() {
+            var payload = new FieldLevelNoLogForgingCase("alpha\n beta\t gamma\r delta");
+
+            var output = convert("payload={}", payload);
+
+            assertAll(
+                    () -> assertThat(output, containsString("alpha_ beta_ gamma_ delta")),
+                    () -> assertThat(output, not(containsString("\n"))),
+                    () -> assertThat(output, not(containsString("\r"))),
+                    () -> assertThat(output, not(containsString("\t")))
+            );
+        }
+
+        @NoLogForging
+        private record NoLogForgingRecord(String forgedLine, @Mask String email) {
+        }
+
+        private static final class FieldLevelNoLogForgingCase {
+            @NoLogForging
+            private final String forgedLine;
+
+            private FieldLevelNoLogForgingCase(String forgedLine) {
+                this.forgedLine = forgedLine;
+            }
+
+            @NoLogForging
+            public String forgedMethod() {
+                return "example\nforged\rmethod\tnot annotated";
+            }
+
+            @Override
+            public String toString() {
+                return "FieldLevelNoLogForgingCase[forgedLine=" + forgedLine + ",forgedMethod=" + forgedMethod() + "]";
+            }
         }
     }
 }

@@ -1,8 +1,10 @@
 package co.ke.xently.log.mask;
 
 import co.ke.xently.log.mask.utils.validators.ValidRegexList;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.*;
 import org.jspecify.annotations.NonNull;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -22,6 +24,9 @@ import java.util.Locale;
 public class P11MaskingProperties {
     @Builder.Default
     private boolean enabled = true;
+    @Builder.Default
+    @Valid
+    private LogForging logForging = new LogForging();
     private List<String> fields;
     @ValidRegexList
     private List<String> patterns;
@@ -84,4 +89,13 @@ public class P11MaskingProperties {
         private boolean enabled = false;
     }
 
+    @Setter
+    @Getter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class LogForging {
+        @Pattern(regexp = "[^\\t\\n\\r]+", message = "Log forging replacement must not contain tab (\\t), newline (\\n) or carriage return (\\r) characters")
+        private String replacement = "_";
+        private boolean replaceContinuousAtOnce = true;
+    }
 }
