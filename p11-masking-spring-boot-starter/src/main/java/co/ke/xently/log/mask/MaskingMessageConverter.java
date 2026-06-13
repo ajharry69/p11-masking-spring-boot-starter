@@ -21,9 +21,9 @@ public class MaskingMessageConverter extends ClassicConverter {
     );
 
     private static volatile MaskingService maskingService;
-    private static volatile P11MaskingProperties properties;
+    private static volatile LogProperties properties;
 
-    static void initialize(MaskingService service, P11MaskingProperties props) {
+    static void initialize(MaskingService service, LogProperties props) {
         maskingService = service;
         properties = props;
     }
@@ -31,8 +31,8 @@ public class MaskingMessageConverter extends ClassicConverter {
     private static String sanitizeForLogForging(Object arg) {
         return LogSanitizer.sanitize(
                 arg,
-                properties.getLogForging().getReplacement(),
-                properties.getLogForging().isReplaceContinuousAtOnce()
+                properties.getForging().getReplacement(),
+                properties.getForging().isReplaceContinuousAtOnce()
         );
     }
 
@@ -48,7 +48,7 @@ public class MaskingMessageConverter extends ClassicConverter {
     public String convert(ILoggingEvent event) {
         var message = event.getFormattedMessage();
         if (maskingService == null || properties == null) return message;
-        if (!properties.isEnabled() || message == null || message.isBlank()) return message;
+        if (!properties.getP11().getMasking().isEnabled() || message == null || message.isBlank()) return message;
 
         var context = new MaskingContext();
         var args = event.getArgumentArray();
@@ -180,7 +180,7 @@ public class MaskingMessageConverter extends ClassicConverter {
     private void handleField(Object name, Object value, Mask annotation, MaskingContext context, int depth) {
         if (!(name instanceof String fieldName) || value == null) return;
         var hasAnnotation = annotation != null;
-        var isConfigured = properties.isFieldConfigured(fieldName);
+        var isConfigured = properties.getP11().isFieldConfigured(fieldName);
 
         if (hasAnnotation) {
             var override = new MaskOverride(annotation.style(), annotation.maskCharacter());
@@ -228,7 +228,7 @@ public class MaskingMessageConverter extends ClassicConverter {
     }
 
     private String applyFieldNameMasking(String message, Map<String, MaskOverride> overrides) {
-        var fields = properties.getFields();
+        var fields = properties.getP11().getMasking().getFields();
         if (fields.isEmpty()) return message;
 
         var masked = message;
@@ -241,7 +241,7 @@ public class MaskingMessageConverter extends ClassicConverter {
     }
 
     private String applyXmlMasking(String message, Map<String, MaskOverride> overrides) {
-        var fields = properties.getFields();
+        var fields = properties.getP11().getMasking().getFields();
 
         var masked = message;
         for (var field : fields) {
@@ -324,7 +324,7 @@ public class MaskingMessageConverter extends ClassicConverter {
         var masked = message;
         masked = maskMatches(EMAIL_PATTERN, masked);
         masked = maskMatches(CARD_PATTERN, masked);
-        for (var pattern : properties.getPatterns()) {
+        for (var pattern : properties.getP11().getMasking().getPatterns()) {
             if (pattern.isBlank()) continue;
             masked = maskMatches(Pattern.compile(pattern), masked);
         }

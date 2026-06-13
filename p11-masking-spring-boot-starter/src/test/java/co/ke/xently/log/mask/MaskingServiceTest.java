@@ -19,9 +19,13 @@ class MaskingServiceTest {
     @ParameterizedTest
     @MethodSource
     void shouldHandleNullAndEmptySafely(String input) {
-        var props = P11MaskingProperties.builder()
-                .maskStyle(MaskingStyle.PARTIAL)
-                .maskCharacter("*")
+        var props = LogProperties.builder()
+                .p11(LogProperties.P11.builder()
+                        .masking(LogProperties.P11.Masking.builder()
+                                .maskStyle(MaskingStyle.PARTIAL)
+                                .maskCharacter("*")
+                                .build())
+                        .build())
                 .build();
         var service = new MaskingService(props);
 
@@ -39,9 +43,13 @@ class MaskingServiceTest {
                 "0712345678, 0********"
         })
         void shouldPartiallyMaskInputs(String input, String expected) {
-            var props = P11MaskingProperties.builder()
-                    .maskStyle(MaskingStyle.PARTIAL)
-                    .maskCharacter("*")
+            var props = LogProperties.builder()
+                    .p11(LogProperties.P11.builder()
+                            .masking(LogProperties.P11.Masking.builder()
+                                    .maskStyle(MaskingStyle.PARTIAL)
+                                    .maskCharacter("*")
+                                    .build())
+                            .build())
                     .build();
             var service = new MaskingService(props);
 
@@ -58,9 +66,13 @@ class MaskingServiceTest {
                 "thisIsAVeryLongStringThatShouldStillBeMaskedToEightCharacters, ********"
         })
         void shouldFullyMaskWithFixedLength(String input, String expected) {
-            var props = P11MaskingProperties.builder()
-                    .maskStyle(MaskingStyle.FULL)
-                    .maskCharacter("*")
+            var props = LogProperties.builder()
+                    .p11(LogProperties.P11.builder()
+                            .masking(LogProperties.P11.Masking.builder()
+                                    .maskStyle(MaskingStyle.FULL)
+                                    .maskCharacter("*")
+                                    .build())
+                            .build())
                     .build();
             var service = new MaskingService(props);
 
@@ -81,9 +93,13 @@ class MaskingServiceTest {
                 "12345, ********2345" // > 4
         })
         void shouldMaskKeepingLast4Visible(String input, String expected) {
-            var props = P11MaskingProperties.builder()
-                    .maskStyle(MaskingStyle.LAST4)
-                    .maskCharacter("*")
+            var props = LogProperties.builder()
+                    .p11(LogProperties.P11.builder()
+                            .masking(LogProperties.P11.Masking.builder()
+                                    .maskStyle(MaskingStyle.LAST4)
+                                    .maskCharacter("*")
+                                    .build())
+                            .build())
                     .build();
             var service = new MaskingService(props);
 
@@ -101,9 +117,13 @@ class MaskingServiceTest {
                 "1234, ########"
         })
         void shouldOverrideStyleAndMaskCharacter(String input, String expected) {
-            var props = P11MaskingProperties.builder()
-                    .maskStyle(MaskingStyle.PARTIAL)
-                    .maskCharacter("*")
+            var props = LogProperties.builder()
+                    .p11(LogProperties.P11.builder()
+                            .masking(LogProperties.P11.Masking.builder()
+                                    .maskStyle(MaskingStyle.PARTIAL)
+                                    .maskCharacter("*")
+                                    .build())
+                            .build())
                     .build();
             var service = new MaskingService(props);
 

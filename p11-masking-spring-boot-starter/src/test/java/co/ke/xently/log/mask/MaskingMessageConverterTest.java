@@ -35,17 +35,21 @@ class MaskingMessageConverterTest {
     private static final String RAW_SHORT_PHONE = "12345";
     private static final String MASKED_EMAIL = "j********@example.com";
 
-    private final P11MaskingProperties properties = P11MaskingProperties.builder()
-            .maskStyle(MaskingStyle.PARTIAL)
-            .maskCharacter("*")
-            .fields(List.of("email", "phoneNumber"))
+    private final LogProperties properties = LogProperties.builder()
+            .p11(LogProperties.P11.builder()
+                    .masking(LogProperties.P11.Masking.builder()
+                            .maskStyle(MaskingStyle.PARTIAL)
+                            .maskCharacter("*")
+                            .fields(List.of("email", "phoneNumber"))
+                            .build())
+                    .build())
             .build();
     private final MaskingService maskingService = new MaskingService(properties);
     private final MaskingMessageConverter converter = new MaskingMessageConverter();
     private final LoggerContext loggerContext = new LoggerContext();
     private final Logger logger = loggerContext.getLogger(MaskingMessageConverterTest.class);
 
-    private static void setConverterState(MaskingService service, P11MaskingProperties props) {
+    private static void setConverterState(MaskingService service, LogProperties props) {
         try {
             Field serviceField = MaskingMessageConverter.class.getDeclaredField("maskingService");
             serviceField.setAccessible(true);
@@ -258,9 +262,13 @@ class MaskingMessageConverterTest {
     class GuardClauses {
         @Test
         void shouldReturnMessageWhenDisabled() {
-            var disabledProps = P11MaskingProperties.builder()
-                    .enabled(false)
-                    .fields(List.of("email"))
+            var disabledProps = LogProperties.builder()
+                    .p11(LogProperties.P11.builder()
+                            .masking(LogProperties.P11.Masking.builder()
+                                    .enabled(false)
+                                    .fields(List.of("email"))
+                                    .build())
+                            .build())
                     .build();
             var disabledService = new MaskingService(disabledProps);
             MaskingMessageConverter.initialize(disabledService, disabledProps);
@@ -526,9 +534,13 @@ class MaskingMessageConverterTest {
         @ParameterizedTest
         @MethodSource
         void shouldMaskCustomPatterns(String message, String expectedMessage) {
-            var customProperties = P11MaskingProperties.builder()
-                    .patterns(List.of(Pattern.compile("""
+            var customProperties = LogProperties.builder()
+                    .p11(LogProperties.P11.builder()
+                            .masking(LogProperties.P11.Masking.builder()
+                                    .patterns(List.of(Pattern.compile("""
                             "[a-z]+_token":\\s*"([^"]+)\"""").pattern()))
+                                    .build())
+                            .build())
                     .build();
             var customService = new MaskingService(customProperties);
             MaskingMessageConverter.initialize(customService, customProperties);

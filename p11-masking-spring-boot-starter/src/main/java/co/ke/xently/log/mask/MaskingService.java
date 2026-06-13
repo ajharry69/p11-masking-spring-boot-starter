@@ -6,14 +6,14 @@ import org.springframework.util.StringUtils;
 @AllArgsConstructor
 public class MaskingService {
     private static final int DEFAULT_MASK_LENGTH = 8;
-    private final P11MaskingProperties properties;
+    private final LogProperties properties;
 
     public String mask(String input) {
         return mask(input, null, null);
     }
 
     public String mask(String input, MaskingStyle styleOverride, String maskCharacterOverride) {
-        if (!properties.isEnabled() || !StringUtils.hasText(input)) return input;
+        if (!properties.getP11().getMasking().isEnabled() || !StringUtils.hasText(input)) return input;
 
         final var ch = resolveMaskCharacter(maskCharacterOverride);
         final var maskSegment = ch.repeat(DEFAULT_MASK_LENGTH);
@@ -39,7 +39,7 @@ public class MaskingService {
 
     private MaskingStyle resolveStyle(MaskingStyle styleOverride) {
         var override = styleOverride == null || styleOverride == MaskingStyle.DEFAULT;
-        var resolved = override ? properties.getMaskStyle() : styleOverride;
+        var resolved = override ? properties.getP11().getMasking().getMaskStyle() : styleOverride;
         return resolved == MaskingStyle.DEFAULT
                 ? MaskingStyle.FULL
                 : resolved;
@@ -47,6 +47,7 @@ public class MaskingService {
 
     private String resolveMaskCharacter(String maskCharacterOverride) {
         if (StringUtils.hasText(maskCharacterOverride)) return maskCharacterOverride;
-        return StringUtils.hasText(properties.getMaskCharacter()) ? properties.getMaskCharacter() : "*";
+        var maskCharacter = properties.getP11().getMasking().getMaskCharacter();
+        return StringUtils.hasText(maskCharacter) ? maskCharacter : "*";
     }
 }

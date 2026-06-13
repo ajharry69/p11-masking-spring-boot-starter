@@ -12,19 +12,20 @@ spring:
 springdoc:
   default-support-form-data: true
   paths-to-match: /api/**
-p11:
-  masking:
-    enabled: true
-    mask-style: PARTIAL
-    mask-character: "*"
-    json:
+log:
+  forging:
+    replacement: "[LOG FORGED]"
+  p11:
+    masking:
       enabled: true
-    fields:
-      - email
-      - phoneNumber
-    # language=RegExp
-    patterns:
-      - '(?:[a-z]+_)*token(?:_[a-z]+)*\s*=([^"]+)[])]'
-      - '"(?:[a-z]+_)*token(?:_[a-z]+)*"\s*:\s*"([^"]+)"'
-    log-forging:
-      replacement: "[LOG FORGED]"
+      mask-style: PARTIAL
+      mask-character: "*"
+      json:
+        enabled: true
+      fields:
+        - email
+        - phoneNumber
+      # language=RegExp
+      patterns:
+        - '(?:[a-z]+_)*token(?:_[a-z]+)*\s*=([^"]+)[])]'
+        - '"(?:[a-z]+_)*token(?:_[a-z]+)*"\s*:\s*"([^"]+)"'

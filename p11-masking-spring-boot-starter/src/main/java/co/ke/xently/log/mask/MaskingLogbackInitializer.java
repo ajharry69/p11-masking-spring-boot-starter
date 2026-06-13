@@ -13,7 +13,7 @@ import java.util.IdentityHashMap;
 @AllArgsConstructor
 public class MaskingLogbackInitializer {
     private final MaskingService service;
-    private final P11MaskingProperties properties;
+    private final LogProperties properties;
 
     public void initialize() {
         MaskingMessageConverter.initialize(service, properties);

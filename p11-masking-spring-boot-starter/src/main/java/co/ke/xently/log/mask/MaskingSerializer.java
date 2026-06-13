@@ -11,16 +11,16 @@ import tools.jackson.databind.ser.std.StdSerializer;
 public class MaskingSerializer extends StdSerializer<Object> {
 
     private final MaskingService maskingService;
-    private final P11MaskingProperties properties;
+    private final LogProperties properties;
     private final MaskingStyle styleOverride;
     private final String maskCharacterOverride;
 
-    public MaskingSerializer(MaskingService maskingService, P11MaskingProperties properties) {
+    public MaskingSerializer(MaskingService maskingService, LogProperties properties) {
         this(maskingService, properties, null, null);
     }
 
     private MaskingSerializer(MaskingService maskingService,
-                              P11MaskingProperties properties,
+                              LogProperties properties,
                               MaskingStyle styleOverride,
                               String maskCharacterOverride) {
         super(Object.class);
@@ -44,7 +44,7 @@ public class MaskingSerializer extends StdSerializer<Object> {
             return new MaskingSerializer(maskingService, properties, annotation.style(), annotation.maskCharacter());
         }
 
-        if (properties.isFieldConfigured(property.getName())) {
+        if (properties.getP11().isFieldConfigured(property.getName())) {
             return this;
         }
 

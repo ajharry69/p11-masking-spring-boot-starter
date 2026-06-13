@@ -21,11 +21,11 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 @SpringBootTest(properties = {
-        "p11.masking.enabled=true",
-        "p11.masking.mask-style=PARTIAL",
-        "p11.masking.mask-character=*",
-        "p11.masking.fields[0]=email",
-        "p11.masking.fields[1]=phoneNumber"
+        "log.p11.masking.enabled=true",
+        "log.p11.masking.mask-style=PARTIAL",
+        "log.p11.masking.mask-character=*",
+        "log.p11.masking.fields[0]=email",
+        "log.p11.masking.fields[1]=phoneNumber"
 })
 @ExtendWith(OutputCaptureExtension.class)
 class MaskingLogbackIntegrationTest {
