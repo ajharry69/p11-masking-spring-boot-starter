@@ -5,8 +5,8 @@ import org.springframework.util.StringUtils;
 
 @AllArgsConstructor
 public class MaskingService {
-    private final P11MaskingProperties properties;
     private static final int DEFAULT_MASK_LENGTH = 8;
+    private final P11MaskingProperties properties;
 
     public String mask(String input) {
         return mask(input, null, null);

@@ -36,39 +36,12 @@ class RegexListValidatorTest {
     @Mock
     private HibernateConstraintViolationBuilder violationBuilder;
 
-    @BeforeEach
-    void setUp() {
-        validator = new RegexListValidator();
-    }
-
-    @Test
-    void shouldReturnTrueWhenListIsNull() {
-        boolean valid = validator.isValid(null, context);
-        assertThat(valid, is(true));
-        verifyNoInteractions(context);
-    }
-
-    @Test
-    void shouldReturnTrueWhenListIsEmpty() {
-        boolean valid = validator.isValid(Collections.emptyList(), context);
-        assertThat(valid, is(true));
-        verifyNoInteractions(context);
-    }
-
     static Stream<List<String>> validRegexLists() {
         return Stream.of(
                 Collections.singletonList("^[a-z]+$"),
                 Arrays.asList("^[a-z]+$", "\\d+"),
                 Arrays.asList(".*", "foo|bar")
         );
-    }
-
-    @ParameterizedTest
-    @MethodSource("validRegexLists")
-    void shouldReturnTrueWhenAllPatternsAreValid(List<String> values) {
-        boolean valid = validator.isValid(values, context);
-        assertThat(valid, is(true));
-        verifyNoInteractions(context);
     }
 
     static Stream<Arguments> invalidRegexLists() {
@@ -94,6 +67,33 @@ class RegexListValidatorTest {
                         "'[', null (at index 2)"
                 )
         );
+    }
+
+    @BeforeEach
+    void setUp() {
+        validator = new RegexListValidator();
+    }
+
+    @Test
+    void shouldReturnTrueWhenListIsNull() {
+        boolean valid = validator.isValid(null, context);
+        assertThat(valid, is(true));
+        verifyNoInteractions(context);
+    }
+
+    @Test
+    void shouldReturnTrueWhenListIsEmpty() {
+        boolean valid = validator.isValid(Collections.emptyList(), context);
+        assertThat(valid, is(true));
+        verifyNoInteractions(context);
+    }
+
+    @ParameterizedTest
+    @MethodSource("validRegexLists")
+    void shouldReturnTrueWhenAllPatternsAreValid(List<String> values) {
+        boolean valid = validator.isValid(values, context);
+        assertThat(valid, is(true));
+        verifyNoInteractions(context);
     }
 
     @ParameterizedTest
