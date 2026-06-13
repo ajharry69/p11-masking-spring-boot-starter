@@ -85,9 +85,6 @@ public class LogProperties {
             @NotEmpty
             @Builder.Default
             private String maskCharacter = "*";
-            @Valid
-            @Builder.Default
-            private Json json = new Json();
 
             public List<String> getFields() {
                 if (!fields.isEmpty()) return fields;
@@ -107,16 +104,6 @@ public class LogProperties {
                         "accountNumber",
                         "pin"
                 );
-            }
-
-            @Setter
-            @Getter
-            @Builder
-            @AllArgsConstructor
-            @NoArgsConstructor
-            public static class Json {
-                @Builder.Default
-                private boolean enabled = false;
             }
         }
     }

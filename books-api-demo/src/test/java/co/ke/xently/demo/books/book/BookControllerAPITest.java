@@ -85,8 +85,8 @@ class BookControllerAPITest {
                 .statusCode(201)
                 .body("title", equalTo("Clean Architecture"))
                 .body("author", equalTo("Robert Martin"))
-                .body("email", equalTo("u********@example.com"))
-                .body("phoneNumber", equalTo("0********"));
+                .body("email", equalTo("uncle.bob@example.com"))
+                .body("phoneNumber", equalTo("0712345678"));
 
         var line = firstLineContaining(output.getOut(), "Creating book:");
         assertAll(
@@ -120,8 +120,8 @@ class BookControllerAPITest {
                 .when().put("/api/v1/books/{id}", id)
                 .then().statusCode(200)
                 .body("title", equalTo("New"))
-                .body("email", equalTo("n********@test.com"))
-                .body("phoneNumber", equalTo("0********"));
+                .body("email", equalTo("new@test.com"))
+                .body("phoneNumber", equalTo("0711111111"));
 
         given().when().delete("/api/v1/books/{id}", id).then().statusCode(204);
 

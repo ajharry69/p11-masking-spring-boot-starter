@@ -4,7 +4,7 @@
 [![Java CI with Maven](https://github.com/xently/p11-masking-spring-boot-starter/actions/workflows/maven.yml/badge.svg)](https://github.com/xently/p11-masking-spring-boot-starter/actions/workflows/maven.yml)
 [![Maven Central Publish](https://github.com/xently/p11-masking-spring-boot-starter/actions/workflows/maven-publish.yml/badge.svg)](https://github.com/xently/p11-masking-spring-boot-starter/actions/workflows/maven-publish.yml)
 
-A spring boot starter and demo showing sensitive data masking in logs/JSON.
+A spring boot starter and demo showing sensitive data masking in logs.
 
 - Spring Boot: 4.x (Jackson 3 `tools.jackson.*`)
 - Java: 21 (LTS)
@@ -13,7 +13,7 @@ A spring boot starter and demo showing sensitive data masking in logs/JSON.
 
 ## Modules
 
-- `p11-masking-spring-boot-starter`: Log masking plus an opt-in Jackson module for JSON field masking.
+- `p11-masking-spring-boot-starter`: Log masking for sensitive data.
 - `books-api-demo`: Minimal CRUD API demonstrating the starter.
 
 ## Quick start
@@ -49,8 +49,6 @@ log:
       enabled: true
       mask-style: PARTIAL  # FULL | PARTIAL | LAST4
       mask-character: "*"
-      json:
-        enabled: true # optional, default false
       fields:
         - email
         - phoneNumber
@@ -67,19 +65,6 @@ Default fields:
 `password`, `passcode`, `secret`, `token`, `accessToken`, `refreshToken`, `ssn`,
 `creditCard`, `cardNumber`, `email`, `phone`, `phoneNumber`, `accountNumber`, `pin`.
 
-## JSON masking (opt-in)
-
-JSON serialization masking is disabled by default. Enable it only when you want
-API responses or other non-log JSON to be masked.
-
-```yaml
-log:
-    p11:
-      masking:
-        json:
-          enabled: true
-```
-
 ## Annotation-based masking
 
 Use `@Mask` to force masking on a specific field even if it is not listed in `p11.masking.fields`.
@@ -92,7 +77,7 @@ import co.ke.xently.log.mask.LogProperties;
 public record UserDto(
         String name,
         @Mask String ssn,
-        @Mask(style = P11MaskingProperties.MaskingStyle.LAST4, maskCharacter = "#") String cardNumber
+        @Mask(style = MaskingStyle.LAST4, maskCharacter = "#") String cardNumber
 ) {}
 ```
 
@@ -132,6 +117,5 @@ log:
 ## Highlights
 
 - Testcontainers: Oracle FreeDB container wired via `@ServiceConnection` for repeatable integration tests.
-- Spring Boot 4 + Jackson 3: Optional contextual `String` serializer applies masking to configured or annotated fields.
 - Logback: `%msg` converter masks sensitive values in log output without manual `ObjectMapper` calls.
 - Java 21: Records for DTOs and modern toolchain.
