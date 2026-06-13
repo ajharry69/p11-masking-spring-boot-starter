@@ -9,15 +9,20 @@ import lombok.AllArgsConstructor;
 import org.slf4j.LoggerFactory;
 
 import java.util.IdentityHashMap;
+import java.util.function.Supplier;
 
 @AllArgsConstructor
-public class MaskingLogbackInitializer {
+public class MaskingLogbackInitializer implements Supplier<MaskingMessageConverter> {
     private final MaskingService service;
     private final LogForgingService forgingService;
     private final LogProperties properties;
 
+    @Override
+    public MaskingMessageConverter get() {
+        return new MaskingMessageConverter(service, forgingService, properties);
+    }
+
     public void initialize() {
-        MaskingMessageConverter.initialize(service, forgingService, properties);
         var loggerFactory = LoggerFactory.getILoggerFactory();
         if (loggerFactory instanceof LoggerContext context) {
             registerConverter("m");
@@ -29,7 +34,7 @@ public class MaskingLogbackInitializer {
 
     private void registerConverter(String key) {
         try {
-            PatternLayout.DEFAULT_CONVERTER_SUPPLIER_MAP.put(key, MaskingMessageConverter::new);
+            PatternLayout.DEFAULT_CONVERTER_SUPPLIER_MAP.put(key, this::get);
         } catch (UnsupportedOperationException ignored) {
             // Some logback versions return unmodifiable maps.
         }
@@ -48,9 +53,9 @@ public class MaskingLogbackInitializer {
                         var layout = patternEncoder.getLayout();
                         if (layout instanceof PatternLayout patternLayout) {
                             var instanceMap = patternLayout.getInstanceConverterMap();
-                            instanceMap.put("m", MaskingMessageConverter::new);
-                            instanceMap.put("msg", MaskingMessageConverter::new);
-                            instanceMap.put("message", MaskingMessageConverter::new);
+                            instanceMap.put("m", this::get);
+                            instanceMap.put("msg", this::get);
+                            instanceMap.put("message", this::get);
                         }
                         patternEncoder.stop();
                         patternEncoder.start();

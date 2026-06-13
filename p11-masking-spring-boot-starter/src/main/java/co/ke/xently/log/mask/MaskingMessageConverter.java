@@ -2,6 +2,7 @@ package co.ke.xently.log.mask;
 
 import ch.qos.logback.classic.pattern.ClassicConverter;
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import lombok.AllArgsConstructor;
 
 import java.lang.reflect.*;
 import java.time.temporal.Temporal;
@@ -9,6 +10,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@AllArgsConstructor
 public class MaskingMessageConverter extends ClassicConverter {
     private static final int MAX_DEPTH = 2;
     private static final Pattern EMAIL_PATTERN = Pattern.compile(
@@ -19,15 +21,9 @@ public class MaskingMessageConverter extends ClassicConverter {
             "\\b(?:\\d[ -]*?){13,19}\\b"
     );
 
-    private static volatile MaskingService maskingService;
-    private static volatile LogForgingService logForgingService;
-    private static volatile LogProperties properties;
-
-    public static void initialize(MaskingService service, LogForgingService forgingService, LogProperties props) {
-        maskingService = service;
-        logForgingService = forgingService;
-        properties = props;
-    }
+    private final MaskingService maskingService;
+    private final LogForgingService logForgingService;
+    private final LogProperties properties;
 
     @Override
     public String convert(ILoggingEvent event) {

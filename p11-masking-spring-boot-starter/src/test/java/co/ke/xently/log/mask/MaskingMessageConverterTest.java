@@ -5,7 +5,6 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.LoggingEvent;
 import org.jspecify.annotations.NonNull;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
@@ -14,7 +13,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,30 +44,9 @@ class MaskingMessageConverterTest {
             .build();
     private final LogForgingService logForgingService = new LogForgingService(properties);
     private final MaskingService maskingService = new MaskingService(properties);
-    private final MaskingMessageConverter converter = new MaskingMessageConverter();
+    private final MaskingMessageConverter converter = new MaskingMessageConverter(maskingService, logForgingService, properties);
     private final LoggerContext loggerContext = new LoggerContext();
     private final Logger logger = loggerContext.getLogger(MaskingMessageConverterTest.class);
-
-    private static void setConverterState(MaskingService service, LogForgingService forgingService, LogProperties props) {
-        try {
-            Field serviceField = MaskingMessageConverter.class.getDeclaredField("maskingService");
-            serviceField.setAccessible(true);
-            serviceField.set(null, service);
-            Field forgingServiceField = MaskingMessageConverter.class.getDeclaredField("logForgingService");
-            forgingServiceField.setAccessible(true);
-            forgingServiceField.set(null, forgingService);
-            Field propsField = MaskingMessageConverter.class.getDeclaredField("properties");
-            propsField.setAccessible(true);
-            propsField.set(null, props);
-        } catch (Exception ex) {
-            throw new IllegalStateException("Failed to reset converter state", ex);
-        }
-    }
-
-    @BeforeEach
-    void setUp() {
-        MaskingMessageConverter.initialize(maskingService, logForgingService, properties);
-    }
 
     private String convert(String message, Object... args) {
         var event = new LoggingEvent(
@@ -276,10 +253,18 @@ class MaskingMessageConverterTest {
                     .build();
             var disabledService = new MaskingService(disabledProps);
             var disabledForgingService = new LogForgingService(disabledProps);
-            MaskingMessageConverter.initialize(disabledService, disabledForgingService, disabledProps);
+            var disabledConverter = new MaskingMessageConverter(disabledService, disabledForgingService, disabledProps);
 
             var message = "email=" + RAW_EMAIL;
-            var masked = convert(message, RAW_EMAIL);
+            var event = new LoggingEvent(
+                    MaskingMessageConverterTest.class.getName(),
+                    logger,
+                    Level.INFO,
+                    message,
+                    null,
+                    new Object[]{RAW_EMAIL}
+            );
+            var masked = disabledConverter.convert(event);
 
             assertAll(
                     () -> assertThat(masked, equalTo(message)),
@@ -297,10 +282,18 @@ class MaskingMessageConverterTest {
 
         @Test
         void shouldReturnMessageWhenUninitialized() {
-            setConverterState(null, null, null);
+            var uninitializedConverter = new MaskingMessageConverter(null, null, null);
             var message = "email=" + RAW_EMAIL;
 
-            var masked = convert(message, RAW_EMAIL);
+            var event = new LoggingEvent(
+                    MaskingMessageConverterTest.class.getName(),
+                    logger,
+                    Level.INFO,
+                    message,
+                    null,
+                    new Object[]{RAW_EMAIL}
+            );
+            var masked = uninitializedConverter.convert(event);
 
             assertThat(masked, equalTo(message));
         }
@@ -549,9 +542,17 @@ class MaskingMessageConverterTest {
                     .build();
             var customService = new MaskingService(customProperties);
             var customForgingService = new LogForgingService(customProperties);
-            MaskingMessageConverter.initialize(customService, customForgingService, customProperties);
+            var customConverter = new MaskingMessageConverter(customService, customForgingService, customProperties);
 
-            var output = convert(message);
+            var event = new LoggingEvent(
+                    MaskingMessageConverterTest.class.getName(),
+                    logger,
+                    Level.INFO,
+                    message,
+                    null,
+                    null
+            );
+            var output = customConverter.convert(event);
 
             assertThat(output, equalTo(expectedMessage));
         }

@@ -3,6 +3,7 @@ package co.ke.xently.demo.books.book;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.PatternLayout;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.ConsoleAppender;
@@ -19,6 +20,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 
@@ -60,6 +62,11 @@ class BookServiceTest {
         var context = (LoggerContext) org.slf4j.LoggerFactory.getILoggerFactory();
         context.reset();
 
+        var forgingService = new LogForgingService(props);
+        PatternLayout.DEFAULT_CONVERTER_SUPPLIER_MAP.put("m", () -> new MaskingMessageConverter(maskingService, forgingService, props));
+        PatternLayout.DEFAULT_CONVERTER_SUPPLIER_MAP.put("msg", () -> new MaskingMessageConverter(maskingService, forgingService, props));
+        PatternLayout.DEFAULT_CONVERTER_SUPPLIER_MAP.put("message", () -> new MaskingMessageConverter(maskingService, forgingService, props));
+
         var encoder = new PatternLayoutEncoder();
         encoder.setContext(context);
         encoder.setPattern("%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} -- %m%n");
@@ -74,7 +81,6 @@ class BookServiceTest {
         root.setLevel(Level.INFO);
         root.addAppender(appender);
 
-        var forgingService = new LogForgingService(props);
         new MaskingLogbackInitializer(maskingService, forgingService, props).initialize();
     }
 
@@ -267,7 +273,11 @@ class BookServiceTest {
                     .build();
             var maskingService = new MaskingService(props);
             var forgingService = new LogForgingService(props);
-            MaskingMessageConverter.initialize(maskingService, forgingService, props);
+            
+            var loggerFactory = LoggerFactory.getILoggerFactory();
+            if (loggerFactory instanceof LoggerContext context) {
+                new MaskingLogbackInitializer(maskingService, forgingService, props).initialize();
+            }
 
             var forgedInput = "line1\nline2";
             var bookDto = new BookDto("Title", forgedInput, "test@example.com", "0700000000");
