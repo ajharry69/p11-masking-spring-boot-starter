@@ -10,7 +10,7 @@ import java.util.stream.Stream;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
-class MaskingServiceTest {
+class LogMaskingServiceTest {
 
     static Stream<String> shouldHandleNullAndEmptySafely() {
         return Stream.of(null, "");
@@ -27,7 +27,7 @@ class MaskingServiceTest {
                                 .build())
                         .build())
                 .build();
-        var service = new MaskingService(props);
+        var service = new LogMaskingService(props);
 
         var actual = service.mask(input);
 
@@ -51,7 +51,7 @@ class MaskingServiceTest {
                                     .build())
                             .build())
                     .build();
-            var service = new MaskingService(props);
+            var service = new LogMaskingService(props);
 
             assertThat(service.mask(input), equalTo(expected));
         }
@@ -74,7 +74,7 @@ class MaskingServiceTest {
                                     .build())
                             .build())
                     .build();
-            var service = new MaskingService(props);
+            var service = new LogMaskingService(props);
 
             var actual = service.mask(input);
 
@@ -101,7 +101,7 @@ class MaskingServiceTest {
                                     .build())
                             .build())
                     .build();
-            var service = new MaskingService(props);
+            var service = new LogMaskingService(props);
 
             var actual = service.mask(input);
 
@@ -125,7 +125,7 @@ class MaskingServiceTest {
                                     .build())
                             .build())
                     .build();
-            var service = new MaskingService(props);
+            var service = new LogMaskingService(props);
 
             var actual = service.mask(input, MaskingStyle.LAST4, "#");
 

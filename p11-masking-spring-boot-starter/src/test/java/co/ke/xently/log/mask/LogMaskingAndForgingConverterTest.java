@@ -24,7 +24,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-class MaskingMessageConverterTest {
+class LogMaskingAndForgingConverterTest {
     private static final String RAW_EMAIL = "john.doe@example.com";
     private static final String RAW_PHONE = "0712345678";
     private static final String RAW_CARD = "4111 1111 1111 1111";
@@ -43,14 +43,14 @@ class MaskingMessageConverterTest {
                     .build())
             .build();
     private final LogForgingService logForgingService = new LogForgingService(properties);
-    private final MaskingService maskingService = new MaskingService(properties);
-    private final MaskingMessageConverter converter = new MaskingMessageConverter(maskingService, logForgingService, properties);
+    private final LogMaskingService maskingService = new LogMaskingService(properties);
+    private final LogMaskingAndForgingConverter converter = new LogMaskingAndForgingConverter(maskingService, logForgingService, properties);
     private final LoggerContext loggerContext = new LoggerContext();
-    private final Logger logger = loggerContext.getLogger(MaskingMessageConverterTest.class);
+    private final Logger logger = loggerContext.getLogger(LogMaskingAndForgingConverterTest.class);
 
     private String convert(String message, Object... args) {
         var event = new LoggingEvent(
-                MaskingMessageConverterTest.class.getName(),
+                LogMaskingAndForgingConverterTest.class.getName(),
                 logger,
                 Level.INFO,
                 message,
@@ -81,7 +81,7 @@ class MaskingMessageConverterTest {
 
     private String invokeMaskXmlValue(String value, Object override) {
         try {
-            Method method = MaskingMessageConverter.class.getDeclaredMethod("maskXmlValue", String.class, maskOverrideClass());
+            Method method = LogMaskingAndForgingConverter.class.getDeclaredMethod("maskXmlValue", String.class, maskOverrideClass());
             method.setAccessible(true);
             return (String) method.invoke(converter, value, override);
         } catch (Exception ex) {
@@ -91,7 +91,7 @@ class MaskingMessageConverterTest {
 
     private String invokeDeriveFieldName(String methodName) {
         try {
-            Method method = MaskingMessageConverter.class.getDeclaredMethod("deriveFieldName", String.class);
+            Method method = LogMaskingAndForgingConverter.class.getDeclaredMethod("deriveFieldName", String.class);
             method.setAccessible(true);
             return (String) method.invoke(converter, methodName);
         } catch (Exception ex) {
@@ -112,7 +112,7 @@ class MaskingMessageConverterTest {
 
     private Class<?> maskOverrideClass() {
         try {
-            return Class.forName("co.ke.xently.log.mask.MaskingMessageConverter$MaskOverride");
+            return Class.forName("co.ke.xently.log.mask.LogMaskingAndForgingConverter$MaskOverride");
         } catch (ClassNotFoundException ex) {
             throw new IllegalStateException("MaskOverride type not found", ex);
         }
@@ -251,13 +251,13 @@ class MaskingMessageConverterTest {
                                     .build())
                             .build())
                     .build();
-            var disabledService = new MaskingService(disabledProps);
+            var disabledService = new LogMaskingService(disabledProps);
             var disabledForgingService = new LogForgingService(disabledProps);
-            var disabledConverter = new MaskingMessageConverter(disabledService, disabledForgingService, disabledProps);
+            var disabledConverter = new LogMaskingAndForgingConverter(disabledService, disabledForgingService, disabledProps);
 
             var message = "email=" + RAW_EMAIL;
             var event = new LoggingEvent(
-                    MaskingMessageConverterTest.class.getName(),
+                    LogMaskingAndForgingConverterTest.class.getName(),
                     logger,
                     Level.INFO,
                     message,
@@ -282,11 +282,11 @@ class MaskingMessageConverterTest {
 
         @Test
         void shouldReturnMessageWhenUninitialized() {
-            var uninitializedConverter = new MaskingMessageConverter(null, null, null);
+            var uninitializedConverter = new LogMaskingAndForgingConverter(null, null, null);
             var message = "email=" + RAW_EMAIL;
 
             var event = new LoggingEvent(
-                    MaskingMessageConverterTest.class.getName(),
+                    LogMaskingAndForgingConverterTest.class.getName(),
                     logger,
                     Level.INFO,
                     message,
@@ -536,16 +536,16 @@ class MaskingMessageConverterTest {
                     .p11(LogProperties.P11.builder()
                             .masking(LogProperties.P11.Masking.builder()
                                     .patterns(List.of(Pattern.compile("""
-                            "[a-z]+_token":\\s*"([^"]+)\"""").pattern()))
+                                            "[a-z]+_token":\\s*"([^"]+)\"""").pattern()))
                                     .build())
                             .build())
                     .build();
-            var customService = new MaskingService(customProperties);
+            var customService = new LogMaskingService(customProperties);
             var customForgingService = new LogForgingService(customProperties);
-            var customConverter = new MaskingMessageConverter(customService, customForgingService, customProperties);
+            var customConverter = new LogMaskingAndForgingConverter(customService, customForgingService, customProperties);
 
             var event = new LoggingEvent(
-                    MaskingMessageConverterTest.class.getName(),
+                    LogMaskingAndForgingConverterTest.class.getName(),
                     logger,
                     Level.INFO,
                     message,

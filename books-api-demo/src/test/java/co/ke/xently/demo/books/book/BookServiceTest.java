@@ -57,15 +57,15 @@ class BookServiceTest {
                                 .build())
                         .build())
                 .build();
-        var maskingService = new MaskingService(props);
+        var maskingService = new LogMaskingService(props);
 
-        var context = (LoggerContext) org.slf4j.LoggerFactory.getILoggerFactory();
+        var context = (LoggerContext) LoggerFactory.getILoggerFactory();
         context.reset();
 
         var forgingService = new LogForgingService(props);
-        PatternLayout.DEFAULT_CONVERTER_SUPPLIER_MAP.put("m", () -> new MaskingMessageConverter(maskingService, forgingService, props));
-        PatternLayout.DEFAULT_CONVERTER_SUPPLIER_MAP.put("msg", () -> new MaskingMessageConverter(maskingService, forgingService, props));
-        PatternLayout.DEFAULT_CONVERTER_SUPPLIER_MAP.put("message", () -> new MaskingMessageConverter(maskingService, forgingService, props));
+        PatternLayout.DEFAULT_CONVERTER_SUPPLIER_MAP.put("m", () -> new LogMaskingAndForgingConverter(maskingService, forgingService, props));
+        PatternLayout.DEFAULT_CONVERTER_SUPPLIER_MAP.put("msg", () -> new LogMaskingAndForgingConverter(maskingService, forgingService, props));
+        PatternLayout.DEFAULT_CONVERTER_SUPPLIER_MAP.put("message", () -> new LogMaskingAndForgingConverter(maskingService, forgingService, props));
 
         var encoder = new PatternLayoutEncoder();
         encoder.setContext(context);
@@ -81,7 +81,7 @@ class BookServiceTest {
         root.setLevel(Level.INFO);
         root.addAppender(appender);
 
-        new MaskingLogbackInitializer(maskingService, forgingService, props).initialize();
+        new LogbackMaskingAndForgingInitializer(maskingService, forgingService, props).initialize();
     }
 
     private static String firstLineContaining(String output, String token) {
@@ -271,12 +271,12 @@ class BookServiceTest {
                                     .build())
                             .build())
                     .build();
-            var maskingService = new MaskingService(props);
+            var maskingService = new LogMaskingService(props);
             var forgingService = new LogForgingService(props);
-            
+
             var loggerFactory = LoggerFactory.getILoggerFactory();
-            if (loggerFactory instanceof LoggerContext context) {
-                new MaskingLogbackInitializer(maskingService, forgingService, props).initialize();
+            if (loggerFactory instanceof LoggerContext) {
+                new LogbackMaskingAndForgingInitializer(maskingService, forgingService, props).initialize();
             }
 
             var forgedInput = "line1\nline2";

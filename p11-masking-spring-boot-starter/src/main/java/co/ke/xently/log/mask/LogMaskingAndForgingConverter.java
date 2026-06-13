@@ -11,7 +11,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @AllArgsConstructor
-public class MaskingMessageConverter extends ClassicConverter {
+public class LogMaskingAndForgingConverter extends ClassicConverter {
     private static final int MAX_DEPTH = 2;
     private static final Pattern EMAIL_PATTERN = Pattern.compile(
             "[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}",
@@ -21,7 +21,7 @@ public class MaskingMessageConverter extends ClassicConverter {
             "\\b(?:\\d[ -]*?){13,19}\\b"
     );
 
-    private final MaskingService maskingService;
+    private final LogMaskingService maskingService;
     private final LogForgingService logForgingService;
     private final LogProperties properties;
 

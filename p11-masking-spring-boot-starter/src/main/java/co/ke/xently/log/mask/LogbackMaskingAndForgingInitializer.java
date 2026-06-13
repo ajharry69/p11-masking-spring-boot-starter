@@ -12,14 +12,14 @@ import java.util.IdentityHashMap;
 import java.util.function.Supplier;
 
 @AllArgsConstructor
-public class MaskingLogbackInitializer implements Supplier<MaskingMessageConverter> {
-    private final MaskingService service;
+public class LogbackMaskingAndForgingInitializer implements Supplier<LogMaskingAndForgingConverter> {
+    private final LogMaskingService service;
     private final LogForgingService forgingService;
     private final LogProperties properties;
 
     @Override
-    public MaskingMessageConverter get() {
-        return new MaskingMessageConverter(service, forgingService, properties);
+    public LogMaskingAndForgingConverter get() {
+        return new LogMaskingAndForgingConverter(service, forgingService, properties);
     }
 
     public void initialize() {

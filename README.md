@@ -80,6 +80,8 @@ public record UserDto(
 ) {}
 ```
 
+Note: `MaskingStyle` is an enum available in the `co.ke.xently.log.mask` package.
+
 ## Log forging prevention
 
 Log forging (or log injection) occurs when an attacker includes control characters (like newlines) in input that is then logged, potentially allowing them to spoof log entries or bypass log analysis tools.

@@ -28,8 +28,8 @@ import static org.junit.jupiter.api.Assertions.assertAll;
         "log.p11.masking.fields[1]=phoneNumber"
 })
 @ExtendWith(OutputCaptureExtension.class)
-class MaskingLogbackIntegrationTest {
-    private static final Logger log = LoggerFactory.getLogger(MaskingLogbackIntegrationTest.class);
+class LogMaskingAndForgingIntegrationTest {
+    private static final Logger log = LoggerFactory.getLogger(LogMaskingAndForgingIntegrationTest.class);
 
     private static String firstLineContaining(String output, String token) {
         return output.lines()

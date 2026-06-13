@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.util.StringUtils;
 
 @AllArgsConstructor
-public class MaskingService {
+public class LogMaskingService {
     private static final int DEFAULT_MASK_LENGTH = 8;
     private final LogProperties properties;
 
