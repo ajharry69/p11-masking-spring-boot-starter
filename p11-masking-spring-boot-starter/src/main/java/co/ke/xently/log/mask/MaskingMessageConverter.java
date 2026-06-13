@@ -136,7 +136,7 @@ public class MaskingMessageConverter extends ClassicConverter {
         }
     }
 
-    private static void executeLogForgingProcessing(MaskingContext context, AnnotatedElement annotationSource, Object value) {
+    private void executeLogForgingProcessing(MaskingContext context, AnnotatedElement annotationSource, Object value) {
         if (logForgingService != null && annotationSource.isAnnotationPresent(NoLogForging.class)) {
             logForgingService.process(context.replacements, value);
         }
