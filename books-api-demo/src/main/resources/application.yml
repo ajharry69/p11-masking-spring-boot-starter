@@ -22,5 +22,9 @@ p11:
     fields:
       - email
       - phoneNumber
+    # language=RegExp
+    patterns:
+      - '(?:[a-z]+_)*token(?:_[a-z]+)*\s*=([^"]+)[])]'
+      - '"(?:[a-z]+_)*token(?:_[a-z]+)*"\s*:\s*"([^"]+)"'
     log-forging:
       replacement: "[LOG FORGED]"
