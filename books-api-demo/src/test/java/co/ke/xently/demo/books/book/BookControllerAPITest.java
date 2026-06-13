@@ -1,6 +1,5 @@
 package co.ke.xently.demo.books.book;
 
-import co.ke.xently.demo.books.TestcontainersConfiguration;
 import io.restassured.RestAssured;
 import io.restassured.config.EncoderConfig;
 import io.restassured.filter.log.RequestLoggingFilter;
@@ -15,7 +14,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.context.annotation.Import;
 
 import java.util.ArrayList;
 
@@ -25,7 +23,6 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Import(TestcontainersConfiguration.class)
 @ExtendWith(OutputCaptureExtension.class)
 class BookControllerAPITest {
 

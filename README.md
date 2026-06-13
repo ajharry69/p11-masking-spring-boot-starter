@@ -9,7 +9,7 @@ A spring boot starter and demo showing sensitive data masking in logs.
 - Spring Boot: 4.x (Jackson 3 `tools.jackson.*`)
 - Java: 21 (LTS)
 - Tests: JUnit 5 with Hamcrest
-- Integration: Testcontainers (Oracle Free) + Rest-Assured
+- Integration: H2 + Rest-Assured
 
 ## Modules
 
@@ -21,18 +21,17 @@ A spring boot starter and demo showing sensitive data masking in logs.
 Requirements:
 - Java 21
 - Maven 3.9+
-- Docker (for Testcontainers)
 
-Run all tests (includes Testcontainers-based API tests):
+Run all tests:
 
 ```bash
-mvn -q -DskipITs=false test
+mvn -q test
 ```
 
-Run the demo API using Testcontainers (Oracle Free):
+Run the demo API:
 
 ```bash
-mvn -pl books-api-demo -am spring-boot:test-run -DskipTests
+mvn -pl books-api-demo -am spring-boot:run
 ```
 
 The APIs can be tested through - http://localhost:8080/swagger-ui.html
@@ -116,6 +115,6 @@ log:
 
 ## Highlights
 
-- Testcontainers: Oracle FreeDB container wired via `@ServiceConnection` for repeatable integration tests.
+- H2: In-memory database with initial data loaded via `import.sql` for repeatable integration tests.
 - Logback: `%msg` converter masks sensitive values in log output without manual `ObjectMapper` calls.
 - Java 21: Records for DTOs and modern toolchain.

@@ -10,7 +10,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
-import org.springframework.context.annotation.Import;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
@@ -39,7 +38,6 @@ final class AuthResultAnnotation {
 }
 
 @Slf4j
-@Import(TestcontainersConfiguration.class)
 @SpringBootTest
 @ExtendWith({OutputCaptureExtension.class})
 class ApplicationTests {
