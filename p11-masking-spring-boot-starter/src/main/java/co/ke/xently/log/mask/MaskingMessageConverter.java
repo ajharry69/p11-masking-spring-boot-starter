@@ -2,7 +2,6 @@ package co.ke.xently.log.mask;
 
 import ch.qos.logback.classic.pattern.ClassicConverter;
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import co.ke.xently.log.mask.utils.LogSanitizer;
 
 import java.lang.reflect.*;
 import java.time.temporal.Temporal;
@@ -21,46 +20,39 @@ public class MaskingMessageConverter extends ClassicConverter {
     );
 
     private static volatile MaskingService maskingService;
+    private static volatile LogForgingService logForgingService;
     private static volatile LogProperties properties;
 
-    static void initialize(MaskingService service, LogProperties props) {
+    public static void initialize(MaskingService service, LogForgingService forgingService, LogProperties props) {
         maskingService = service;
+        logForgingService = forgingService;
         properties = props;
-    }
-
-    private static String sanitizeForLogForging(Object arg) {
-        return LogSanitizer.sanitize(
-                arg,
-                properties.getForging().getReplacement(),
-                properties.getForging().isReplaceContinuousAtOnce()
-        );
-    }
-
-    private static void processForLogForging(MaskingContext context, Object value) {
-        var raw = String.valueOf(value);
-        var sanitized = sanitizeForLogForging(raw);
-        if (!raw.equals(sanitized)) {
-            context.replacements.put(raw, sanitized);
-        }
     }
 
     @Override
     public String convert(ILoggingEvent event) {
         var message = event.getFormattedMessage();
         if (maskingService == null || properties == null) return message;
-        if (!properties.getP11().getMasking().isEnabled() || message == null || message.isBlank()) return message;
+        var isMaskingEnabled = properties.getP11().getMasking().isEnabled();
+        if (message == null || message.isBlank()) return message;
 
         var context = new MaskingContext();
         var args = event.getArgumentArray();
         if (args != null) {
             for (var arg : args) {
                 if (arg == null) continue;
-                sanitizeForLogForging(context, arg.getClass(), arg);
-                inspectArgument(arg, context, 0);
+                executeLogForgingProcessing(context, arg.getClass(), arg);
+                if (isMaskingEnabled) {
+                    inspectArgument(arg, context, 0);
+                }
             }
         }
 
         var masked = applyValueReplacements(message, context.replacements);
+
+        if (!isMaskingEnabled) {
+            return masked;
+        }
         masked = applyFieldNameMasking(masked, context.fieldOverrides);
         masked = applyXmlMasking(masked, context.fieldOverrides);
         masked = applyPatternMasking(masked);
@@ -108,7 +100,7 @@ public class MaskingMessageConverter extends ClassicConverter {
                 var accessor = component.getAccessor();
                 var value = accessor.invoke(arg);
                 var annotation = component.getAnnotation(Mask.class);
-                sanitizeForLogForging(context, component, value);
+                executeLogForgingProcessing(context, component, value);
                 handleField(component.getName(), value, annotation, context, depth);
             } catch (Exception ignored) {
                 // Best-effort masking for logs.
@@ -134,13 +126,19 @@ public class MaskingMessageConverter extends ClassicConverter {
                     }
                     var value = field.get(arg);
                     var annotation = field.getAnnotation(Mask.class);
-                    sanitizeForLogForging(context, field, value);
+                    executeLogForgingProcessing(context, field, value);
                     handleField(field.getName(), value, annotation, context, depth);
                 } catch (Throwable ignored) {
                     // Best-effort masking for logs.
                 }
             }
             type = type.getSuperclass();
+        }
+    }
+
+    private static void executeLogForgingProcessing(MaskingContext context, AnnotatedElement annotationSource, Object value) {
+        if (logForgingService != null && annotationSource.isAnnotationPresent(NoLogForging.class)) {
+            logForgingService.process(context.replacements, value);
         }
     }
 
@@ -164,9 +162,7 @@ public class MaskingMessageConverter extends ClassicConverter {
                         method.setAccessible(true);
                     }
                     var value = method.invoke(arg);
-                    if (hasNoLogForging) {
-                        processForLogForging(context, value);
-                    }
+                    executeLogForgingProcessing(context, method, value);
                     var fieldName = deriveFieldName(method.getName());
                     handleField(fieldName, value, annotation, context, depth);
                 } catch (Throwable ignored) {
@@ -197,25 +193,11 @@ public class MaskingMessageConverter extends ClassicConverter {
                 );
                 addReplacement(context.replacements, raw, masked);
             }
-        } else if (argHasNoLogForging(value)) {
-            // Apply log forging prevention even if masking is not required
-            var sanitized = sanitizeForLogForging(raw);
-            addReplacement(context.replacements, raw, sanitized);
         }
+        executeLogForgingProcessing(context, value.getClass(), value);
 
         if (!isSimple(value)) {
             inspectArgument(value, context, depth + 1);
-        }
-    }
-
-    private boolean argHasNoLogForging(Object arg) {
-        if (arg == null) return false;
-        return arg.getClass().isAnnotationPresent(NoLogForging.class);
-    }
-
-    private void sanitizeForLogForging(MaskingContext context, AnnotatedElement element, Object value) {
-        if (element.isAnnotationPresent(NoLogForging.class)) {
-            processForLogForging(context, value);
         }
     }
 

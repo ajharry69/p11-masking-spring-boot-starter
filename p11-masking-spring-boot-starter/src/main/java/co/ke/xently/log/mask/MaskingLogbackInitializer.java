@@ -13,10 +13,11 @@ import java.util.IdentityHashMap;
 @AllArgsConstructor
 public class MaskingLogbackInitializer {
     private final MaskingService service;
+    private final LogForgingService forgingService;
     private final LogProperties properties;
 
     public void initialize() {
-        MaskingMessageConverter.initialize(service, properties);
+        MaskingMessageConverter.initialize(service, forgingService, properties);
         var loggerFactory = LoggerFactory.getILoggerFactory();
         if (loggerFactory instanceof LoggerContext context) {
             registerConverter("m");

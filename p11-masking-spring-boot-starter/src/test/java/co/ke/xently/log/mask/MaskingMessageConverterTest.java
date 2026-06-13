@@ -44,16 +44,20 @@ class MaskingMessageConverterTest {
                             .build())
                     .build())
             .build();
+    private final LogForgingService logForgingService = new LogForgingService(properties);
     private final MaskingService maskingService = new MaskingService(properties);
     private final MaskingMessageConverter converter = new MaskingMessageConverter();
     private final LoggerContext loggerContext = new LoggerContext();
     private final Logger logger = loggerContext.getLogger(MaskingMessageConverterTest.class);
 
-    private static void setConverterState(MaskingService service, LogProperties props) {
+    private static void setConverterState(MaskingService service, LogForgingService forgingService, LogProperties props) {
         try {
             Field serviceField = MaskingMessageConverter.class.getDeclaredField("maskingService");
             serviceField.setAccessible(true);
             serviceField.set(null, service);
+            Field forgingServiceField = MaskingMessageConverter.class.getDeclaredField("logForgingService");
+            forgingServiceField.setAccessible(true);
+            forgingServiceField.set(null, forgingService);
             Field propsField = MaskingMessageConverter.class.getDeclaredField("properties");
             propsField.setAccessible(true);
             propsField.set(null, props);
@@ -64,7 +68,7 @@ class MaskingMessageConverterTest {
 
     @BeforeEach
     void setUp() {
-        MaskingMessageConverter.initialize(maskingService, properties);
+        MaskingMessageConverter.initialize(maskingService, logForgingService, properties);
     }
 
     private String convert(String message, Object... args) {
@@ -271,7 +275,8 @@ class MaskingMessageConverterTest {
                             .build())
                     .build();
             var disabledService = new MaskingService(disabledProps);
-            MaskingMessageConverter.initialize(disabledService, disabledProps);
+            var disabledForgingService = new LogForgingService(disabledProps);
+            MaskingMessageConverter.initialize(disabledService, disabledForgingService, disabledProps);
 
             var message = "email=" + RAW_EMAIL;
             var masked = convert(message, RAW_EMAIL);
@@ -292,7 +297,7 @@ class MaskingMessageConverterTest {
 
         @Test
         void shouldReturnMessageWhenUninitialized() {
-            setConverterState(null, null);
+            setConverterState(null, null, null);
             var message = "email=" + RAW_EMAIL;
 
             var masked = convert(message, RAW_EMAIL);
@@ -543,7 +548,8 @@ class MaskingMessageConverterTest {
                             .build())
                     .build();
             var customService = new MaskingService(customProperties);
-            MaskingMessageConverter.initialize(customService, customProperties);
+            var customForgingService = new LogForgingService(customProperties);
+            MaskingMessageConverter.initialize(customService, customForgingService, customProperties);
 
             var output = convert(message);
 

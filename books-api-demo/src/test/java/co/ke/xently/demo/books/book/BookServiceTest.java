@@ -70,11 +70,12 @@ class BookServiceTest {
         appender.setEncoder(encoder);
         appender.start();
 
-        Logger root = context.getLogger(Logger.ROOT_LOGGER_NAME);
+        var root = context.getLogger(Logger.ROOT_LOGGER_NAME);
         root.setLevel(Level.INFO);
         root.addAppender(appender);
 
-        new MaskingLogbackInitializer(maskingService, props).initialize();
+        var forgingService = new LogForgingService(props);
+        new MaskingLogbackInitializer(maskingService, forgingService, props).initialize();
     }
 
     private static String firstLineContaining(String output, String token) {
@@ -250,6 +251,39 @@ class BookServiceTest {
                     () -> assertThat(line, not(emptyString())),
                     () -> assertMasked(line, logCase.expected(), logCase.unexpected())
             );
+        }
+
+        @Test
+        void shouldSanitizeLogForgingWhenMaskingIsDisabled(CapturedOutput output) {
+            var props = LogProperties.builder()
+                    .forging(LogProperties.Forging.builder()
+                            .replacement("[FORGED]")
+                            .build())
+                    .p11(LogProperties.P11.builder()
+                            .masking(LogProperties.P11.Masking.builder()
+                                    .enabled(false)
+                                    .build())
+                            .build())
+                    .build();
+            var maskingService = new MaskingService(props);
+            var forgingService = new LogForgingService(props);
+            MaskingMessageConverter.initialize(maskingService, forgingService, props);
+
+            var forgedInput = "line1\nline2";
+            var bookDto = new BookDto("Title", forgedInput, "test@example.com", "0700000000");
+            var savedBook = Book.builder()
+                    .id(1L)
+                    .title(bookDto.title())
+                    .author(bookDto.author())
+                    .email(bookDto.email())
+                    .phoneNumber(bookDto.phoneNumber())
+                    .build();
+            when(bookRepository.save(any(Book.class))).thenReturn(savedBook);
+
+            service.createBook(bookDto);
+
+            var line = firstLineContaining(output.getOut(), "Creating book:");
+            assertThat(line, containsString("line1[FORGED]line2"));
         }
     }
 }
