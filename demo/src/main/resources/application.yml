@@ -26,11 +26,11 @@ log:
       mask-style: PARTIAL
       mask-character: "*"
       default-mask-length: 8
-      partial-masking-exemption:
+      partial-exemption:
         from-end: 0
         from-start: 1
-        min-partial-unmasked-length: 3
-        mask-if-short-or-equal-to-exemption: true
+        min-unmasked-length: 3
+        mask-if-short: true
       fields:
         - email
         - phoneNumber

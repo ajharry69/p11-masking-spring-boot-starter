@@ -34,7 +34,7 @@ Run the demo API:
 mvn -pl demo -am spring-boot:run
 ```
 
-The APIs can be tested through - http://localhost:8080/swagger-ui.html
+The APIs can be tested through - http://localhost:8080/scalar
 
 ## Config (demo)
 
@@ -48,9 +48,52 @@ log:
       enabled: true
       mask-style: PARTIAL  # FULL | PARTIAL
       mask-character: "*"
+      default-mask-length: 8
+      partial-exemption:
+        from-start: 1
+        from-end: 0
+        min-unmasked-length: 3
+        mask-if-short: true
       fields:
         - email
         - phoneNumber
+```
+
+## Masking styles
+
+The starter supports two masking styles:
+
+### FULL masking
+The entire value is replaced with a mask of a fixed length (configured via `default-mask-length`).
+
+### PARTIAL masking
+Only parts of the value are masked, leaving some characters visible (e.g., for verification purposes).
+
+Configuration options for `PARTIAL` masking:
+- `from-start`: Number of characters to leave unmasked at the beginning.
+- `from-end`: Number of characters to leave unmasked at the end.
+- `min-unmasked-length`: Minimum length the string must have for partial masking to be applied.
+- `mask-if-short`: If the string is shorter than `min-unmasked-length` (after accounting for exemptions), should it be fully masked (true) or left unmasked (false).
+
+Email addresses are handled specially in `PARTIAL` mode: only the username part is partially masked, while the domain remains fully visible.
+
+### Pattern-based masking
+
+You can define custom regular expressions to find and mask sensitive data in log messages using `log.p11.masking.patterns`.
+
+- **With capturing groups**: If the regex contains capturing groups, only the content of those groups will be masked. This is ideal for masking values within a specific format (e.g., `key=value` or JSON).
+- **Without capturing groups**: The entire text matched by the regex will be masked.
+
+Example configuration:
+```yaml
+log:
+  p11:
+    masking:
+      patterns:
+        # Mask only the value part of a token parameter
+        - '(?:[a-z]+_)*token(?:_[a-z]+)*\s*=([^"]+)[])]'
+        # Mask only the value in a JSON "token" field
+        - '"(?:[a-z]+_)*token(?:_[a-z]+)*"\s*:\s*"([^"]+)"'
 ```
 
 ## Log masking (no code changes)

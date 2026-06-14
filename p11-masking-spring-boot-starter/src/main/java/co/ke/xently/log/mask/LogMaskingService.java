@@ -29,7 +29,7 @@ public class LogMaskingService {
         return switch (resolveStyle(styleOverride)) {
             case FULL, DEFAULT -> maskSegment;
             case PARTIAL -> {
-                var maskingExemption = masking.getPartialMaskingExemption();
+                var maskingExemption = masking.getPartialExemption();
 
                 if (input.contains("@")) { // Email
                     var usernameLength = input.indexOf("@");
@@ -44,8 +44,8 @@ public class LogMaskingService {
     private String getPartialMask(String input, int inputLength, PartialMaskingExemption maskingExemption) {
         var fromStart = maskingExemption.getFromStart();
         var fromEnd = maskingExemption.getFromEnd();
-        if (inputLength - fromStart - fromEnd <= maskingExemption.getMinPartialUnmaskedLength()) {
-            return maskingExemption.isMaskIfShortOrEqualToExemption() ? maskSegment : input;
+        if (inputLength - fromStart - fromEnd <= maskingExemption.getMinUnmaskedLength()) {
+            return maskingExemption.isMaskIfShort() ? maskSegment : input;
         }
         return input.substring(0, fromStart) + maskSegment + input.substring(inputLength - fromEnd);
     }

@@ -57,7 +57,7 @@ class LogMaskingServiceTest {
                             .masking(LogProperties.P11.Masking.builder()
                                     .maskStyle(MaskingStyle.PARTIAL)
                                     .maskCharacter("*")
-                                    .partialMaskingExemption(LogProperties.P11.Masking.PartialMaskingExemption.builder()
+                                    .partialExemption(LogProperties.P11.Masking.PartialMaskingExemption.builder()
                                             .fromStart(fromStart)
                                             .fromEnd(fromEnd)
                                             .build())

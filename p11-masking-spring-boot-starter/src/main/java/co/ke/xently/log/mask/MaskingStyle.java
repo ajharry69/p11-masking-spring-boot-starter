@@ -13,7 +13,7 @@ public enum MaskingStyle {
     FULL,
     /**
      * Represents the partial masking style. This style is used to mask all characters in a string except
-     * the first (@LogProperties.P11.Masking.partialMaskingExemption) characters.
+     * the first ({@code LogProperties.P11.Masking.partialExemption}) characters.
      */
     PARTIAL
 }
