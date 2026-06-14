@@ -14,7 +14,7 @@ A spring boot starter and demo showing sensitive data masking in logs.
 ## Modules
 
 - `p11-masking-spring-boot-starter`: Log masking for sensitive data.
-- `books-api-demo`: Minimal CRUD API demonstrating the starter.
+- `demo`: Minimal CRUD API demonstrating the starter.
 
 ## Quick start
 
@@ -31,7 +31,7 @@ mvn -q test
 Run the demo API:
 
 ```bash
-mvn -pl books-api-demo -am spring-boot:run
+mvn -pl demo -am spring-boot:run
 ```
 
 The APIs can be tested through - http://localhost:8080/swagger-ui.html

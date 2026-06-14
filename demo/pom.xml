@@ -8,7 +8,7 @@
         <version>4.4.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    <artifactId>books-api-demo</artifactId>
+    <artifactId>demo</artifactId>
     <properties>
         <maven.deploy.skip>true</maven.deploy.skip>
     </properties>

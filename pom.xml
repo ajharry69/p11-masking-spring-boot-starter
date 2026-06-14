@@ -50,7 +50,7 @@
     </properties>
 
     <modules>
-        <module>books-api-demo</module>
+        <module>demo</module>
         <module>p11-masking-spring-boot-starter</module>
         <module>report-aggregate</module>
     </modules>
