@@ -8,14 +8,11 @@ import io.restassured.http.ContentType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.function.Executable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.boot.test.web.server.LocalServerPort;
-
-import java.util.ArrayList;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -44,12 +41,12 @@ class BookControllerAPITest {
                                      String maskedPhone,
                                      String rawEmail,
                                      String rawPhone) {
-        var checks = new ArrayList<Runnable>();
-        checks.add(() -> assertThat(line, containsString(maskedEmail)));
-        checks.add(() -> assertThat(line, containsString(maskedPhone)));
-        checks.add(() -> assertThat(line, not(containsString(rawEmail))));
-        checks.add(() -> assertThat(line, not(containsString(rawPhone))));
-        assertAll(checks.stream().map(check -> (Executable) check::run).toList());
+        assertAll(
+                () -> assertThat(line, containsString(maskedEmail)),
+                () -> assertThat(line, containsString(maskedPhone)),
+                () -> assertThat(line, not(containsString(rawEmail))),
+                () -> assertThat(line, not(containsString(rawPhone)))
+        );
     }
 
     @BeforeEach
@@ -108,8 +105,8 @@ class BookControllerAPITest {
                 {
                   "title": "New",
                   "author": "Auth2",
-                  "email": "new@test.com",
-                  "phoneNumber": "0711111111"
+                  "email": "new.test@test.com",
+                  "phoneNumber": "+254711111111"
                 }""";
 
         given().contentType(ContentType.JSON)
@@ -117,8 +114,8 @@ class BookControllerAPITest {
                 .when().put("/api/v1/books/{id}", id)
                 .then().statusCode(200)
                 .body("title", equalTo("New"))
-                .body("email", equalTo("new@test.com"))
-                .body("phoneNumber", equalTo("0711111111"));
+                .body("email", equalTo("new.test@test.com"))
+                .body("phoneNumber", equalTo("+254711111111"));
 
         given().when().delete("/api/v1/books/{id}", id).then().statusCode(204);
 
@@ -129,9 +126,9 @@ class BookControllerAPITest {
                 () -> assertThat(line, not(emptyString())),
                 () -> assertMasked(line,
                         "n********@test.com",
-                        "0********",
-                        "new@test.com",
-                        "0711111111"
+                        "+********",
+                        "new.test@test.com",
+                        "+254711111111"
                 )
         );
     }

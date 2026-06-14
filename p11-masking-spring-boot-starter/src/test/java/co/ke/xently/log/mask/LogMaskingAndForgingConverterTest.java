@@ -131,7 +131,7 @@ class LogMaskingAndForgingConverterTest {
     }
 
     private record OverrideDto(
-            @Mask(style = MaskingStyle.LAST4, maskCharacter = "#") String phoneNumber
+            @Mask(style = MaskingStyle.PARTIAL, maskCharacter = "#") String phoneNumber
     ) {
     }
 
@@ -347,7 +347,7 @@ class LogMaskingAndForgingConverterTest {
 
             var masked = convert("payload={}", dto);
 
-            assertMasked(masked, List.of("phoneNumber=########7890"), List.of("1234567890"));
+            assertMasked(masked, List.of("phoneNumber=1########"), List.of("1234567890"));
         }
 
         @Test
@@ -355,7 +355,7 @@ class LogMaskingAndForgingConverterTest {
             var override = new OverrideDto("1234567890");
             var message = "phoneNumber=5555555555";
 
-            var maskedValue = masked("5555555555", MaskingStyle.LAST4, "#");
+            var maskedValue = masked("5555555555", MaskingStyle.PARTIAL, "#");
             var defaultMasked = masked("5555555555");
 
             var masked = convert(message, override);
@@ -590,11 +590,11 @@ class LogMaskingAndForgingConverterTest {
 
         @Test
         void shouldMaskUsingOverride() {
-            var override = newMaskOverride(MaskingStyle.LAST4, "#");
+            var override = newMaskOverride(MaskingStyle.PARTIAL, "#");
 
             var output = invokeMaskXmlValue("1234567890", override);
 
-            assertThat(output, equalTo("########7890"));
+            assertThat(output, equalTo("1########"));
         }
     }
 

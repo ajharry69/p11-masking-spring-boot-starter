@@ -15,10 +15,5 @@ public enum MaskingStyle {
      * Represents the partial masking style. This style is used to mask all characters in a string except
      * the first (@LogProperties.P11.Masking.partialMaskingExemption) characters.
      */
-    PARTIAL,
-    /**
-     * Represents the last 4 masking style. This style is used to mask all the characters in a string
-     * except the last 4 characters.
-     */
-    LAST4
+    PARTIAL
 }

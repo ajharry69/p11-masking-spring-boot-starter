@@ -1,10 +1,9 @@
 package co.ke.xently.log.mask;
 
+import co.ke.xently.log.mask.utils.validators.ValidPartialMaskingExemption;
 import co.ke.xently.log.mask.utils.validators.ValidRegexList;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.*;
 import lombok.*;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
@@ -85,6 +84,14 @@ public class LogProperties {
             @NotEmpty
             @Builder.Default
             private String maskCharacter = "*";
+            @Min(value = 3)
+            @Builder.Default
+            private int defaultMaskLength = 8;
+            @NotNull
+            @Valid
+            @ValidPartialMaskingExemption
+            @Builder.Default
+            private PartialMaskingExemption partialMaskingExemption = new PartialMaskingExemption();
 
             public List<String> getFields() {
                 if (!fields.isEmpty()) return fields;
@@ -104,6 +111,25 @@ public class LogProperties {
                         "accountNumber",
                         "pin"
                 );
+            }
+
+            @Setter
+            @Getter
+            @Builder
+            @AllArgsConstructor
+            @NoArgsConstructor
+            public static class PartialMaskingExemption {
+                @PositiveOrZero
+                @Builder.Default
+                private int fromStart = 1;
+                @PositiveOrZero
+                @Builder.Default
+                private int fromEnd = 0;
+                @Positive
+                @Builder.Default
+                private int minPartialUnmaskedLength = 3;
+                @Builder.Default
+                private boolean maskIfShortOrEqualToExemption = true;
             }
         }
     }

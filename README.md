@@ -46,7 +46,7 @@ log:
   p11:
     masking:
       enabled: true
-      mask-style: PARTIAL  # FULL | PARTIAL | LAST4
+      mask-style: PARTIAL  # FULL | PARTIAL
       mask-character: "*"
       fields:
         - email
@@ -76,7 +76,7 @@ import co.ke.xently.log.mask.LogProperties;
 public record UserDto(
         String name,
         @Mask String ssn,
-        @Mask(style = MaskingStyle.LAST4, maskCharacter = "#") String cardNumber
+        @Mask(style = MaskingStyle.PARTIAL, maskCharacter = "#") String cardNumber
 ) {}
 ```
 

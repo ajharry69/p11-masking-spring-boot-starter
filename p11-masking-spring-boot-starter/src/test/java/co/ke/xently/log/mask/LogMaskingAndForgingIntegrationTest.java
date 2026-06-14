@@ -62,7 +62,7 @@ class LogMaskingAndForgingIntegrationTest {
     }
 
     private record OverrideDto(
-            @Mask(style = MaskingStyle.LAST4, maskCharacter = "#") String phoneNumber
+            @Mask(style = MaskingStyle.PARTIAL, maskCharacter = "#") String phoneNumber
     ) {
     }
 
@@ -84,7 +84,7 @@ class LogMaskingAndForgingIntegrationTest {
                             "annotation override",
                             () -> log.info("mask-override {}", override),
                             "mask-override",
-                            List.of("phoneNumber=########7890"),
+                            List.of("phoneNumber=1########"),
                             List.of("1234567890")
                     )
             );

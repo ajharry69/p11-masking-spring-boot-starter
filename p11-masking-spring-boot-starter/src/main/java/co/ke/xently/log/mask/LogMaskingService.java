@@ -1,40 +1,53 @@
 package co.ke.xently.log.mask;
 
-import lombok.AllArgsConstructor;
+import co.ke.xently.log.mask.LogProperties.P11.Masking.PartialMaskingExemption;
 import org.springframework.util.StringUtils;
 
-@AllArgsConstructor
+import java.util.HashMap;
+import java.util.Map;
+
 public class LogMaskingService {
-    private static final int DEFAULT_MASK_LENGTH = 8;
+    private static final Map<String, String> MASK_SEGMENT_CACHE = new HashMap<>();
     private final LogProperties properties;
+    private String maskSegment = null;
+
+    public LogMaskingService(LogProperties properties) {
+        this.properties = properties;
+    }
 
     public String mask(String input) {
         return mask(input, null, null);
     }
 
     public String mask(String input, MaskingStyle styleOverride, String maskCharacterOverride) {
-        if (!properties.getP11().getMasking().isEnabled() || !StringUtils.hasText(input)) return input;
+        var masking = properties.getP11().getMasking();
+        if (!masking.isEnabled() || !StringUtils.hasText(input)) return input;
 
         final var ch = resolveMaskCharacter(maskCharacterOverride);
-        final var maskSegment = ch.repeat(DEFAULT_MASK_LENGTH);
+        maskSegment = MASK_SEGMENT_CACHE.computeIfAbsent(ch, k -> k.repeat(masking.getDefaultMaskLength()));
+        final var inputLength = input.length();
         return switch (resolveStyle(styleOverride)) {
             case FULL, DEFAULT -> maskSegment;
-            case LAST4 -> {
-                int unmaskedCharacters = 4;
-                if (input.length() <= unmaskedCharacters) yield maskSegment;
-                yield maskSegment + input.substring(input.length() - unmaskedCharacters);
-            }
             case PARTIAL -> {
+                var maskingExemption = masking.getPartialMaskingExemption();
+
                 if (input.contains("@")) { // Email
-                    int atIndex = input.indexOf("@");
-                    if (atIndex <= 1) yield input; // Too short to mask
-                    yield input.charAt(0) + maskSegment + input.substring(atIndex);
+                    var usernameLength = input.indexOf("@");
+                    var username = input.substring(0, usernameLength);
+                    yield getPartialMask(username, usernameLength, maskingExemption) + input.substring(usernameLength);
                 }
-                // Default partial (keep first char)
-                if (input.length() <= 1) yield input;
-                yield input.charAt(0) + maskSegment;
+                yield getPartialMask(input, inputLength, maskingExemption);
             }
         };
+    }
+
+    private String getPartialMask(String input, int inputLength, PartialMaskingExemption maskingExemption) {
+        var fromStart = maskingExemption.getFromStart();
+        var fromEnd = maskingExemption.getFromEnd();
+        if (inputLength - fromStart - fromEnd <= maskingExemption.getMinPartialUnmaskedLength()) {
+            return maskingExemption.isMaskIfShortOrEqualToExemption() ? maskSegment : input;
+        }
+        return input.substring(0, fromStart) + maskSegment + input.substring(inputLength - fromEnd);
     }
 
     private MaskingStyle resolveStyle(MaskingStyle styleOverride) {
@@ -47,7 +60,6 @@ public class LogMaskingService {
 
     private String resolveMaskCharacter(String maskCharacterOverride) {
         if (StringUtils.hasText(maskCharacterOverride)) return maskCharacterOverride;
-        var maskCharacter = properties.getP11().getMasking().getMaskCharacter();
-        return StringUtils.hasText(maskCharacter) ? maskCharacter : "*";
+        return properties.getP11().getMasking().getMaskCharacter();
     }
 }

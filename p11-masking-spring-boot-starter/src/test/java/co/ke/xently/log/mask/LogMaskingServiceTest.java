@@ -36,18 +36,31 @@ class LogMaskingServiceTest {
 
     @Nested
     class PartialMasking {
-        @ParameterizedTest(name = "shouldPartiallyMaskEmail: {0} -> {1}")
+        @ParameterizedTest(name = "shouldPartiallyMaskInputs: {0}; fromStart: {1}; fromEnd: {2} -> {3}")
         @CsvSource({
-                "john.doe@example.com, j********@example.com",
-                "a@b.com, a@b.com", // too short to mask username part safely
-                "0712345678, 0********"
+                "john.doe@example.com, 1, 0, j********@example.com",
+                "john.doe@example.com, 1, 1, j********e@example.com",
+                "a@b.com, 1, 0, ********@b.com",
+                "0712345678, 1, 0, 0********",
+                "1234567890, 0, 4, ********7890",
+                "1234567890, 2, 4, 12********7890",
+                "1234567890, 1, 4, 1********7890",
+                "1234567890, 5, 4, ********", // unmasked would be too short
+                "1234567890, 5, 5, ********", // masked section would actually be empty
+                "4111111111111111, 0, 4, ********1111",
+                "123, 0, 4, ********", // < 4
+                "1234, 0, 4, ********"
         })
-        void shouldPartiallyMaskInputs(String input, String expected) {
+        void shouldPartiallyMaskInputs(String input, int fromStart, int fromEnd, String expected) {
             var props = LogProperties.builder()
                     .p11(LogProperties.P11.builder()
                             .masking(LogProperties.P11.Masking.builder()
                                     .maskStyle(MaskingStyle.PARTIAL)
                                     .maskCharacter("*")
+                                    .partialMaskingExemption(LogProperties.P11.Masking.PartialMaskingExemption.builder()
+                                            .fromStart(fromStart)
+                                            .fromEnd(fromEnd)
+                                            .build())
                                     .build())
                             .build())
                     .build();
@@ -83,37 +96,10 @@ class LogMaskingServiceTest {
     }
 
     @Nested
-    class Last4Masking {
-        @ParameterizedTest(name = "shouldMaskLast4: {0} -> {1}")
-        @CsvSource({
-                "1234567890, ********7890",
-                "4111111111111111, ********1111",
-                "123, ********", // < 4
-                "1234, ********", // == 4
-                "12345, ********2345" // > 4
-        })
-        void shouldMaskKeepingLast4Visible(String input, String expected) {
-            var props = LogProperties.builder()
-                    .p11(LogProperties.P11.builder()
-                            .masking(LogProperties.P11.Masking.builder()
-                                    .maskStyle(MaskingStyle.LAST4)
-                                    .maskCharacter("*")
-                                    .build())
-                            .build())
-                    .build();
-            var service = new LogMaskingService(props);
-
-            var actual = service.mask(input);
-
-            assertThat(actual, equalTo(expected));
-        }
-    }
-
-    @Nested
     class Overrides {
         @ParameterizedTest(name = "shouldOverrideStyleAndChar: {0} -> {1}")
         @CsvSource({
-                "1234567890, ########7890",
+                "1234567890, 1########",
                 "1234, ########"
         })
         void shouldOverrideStyleAndMaskCharacter(String input, String expected) {
@@ -127,7 +113,7 @@ class LogMaskingServiceTest {
                     .build();
             var service = new LogMaskingService(props);
 
-            var actual = service.mask(input, MaskingStyle.LAST4, "#");
+            var actual = service.mask(input, MaskingStyle.PARTIAL, "#");
 
             assertThat(actual, equalTo(expected));
         }
