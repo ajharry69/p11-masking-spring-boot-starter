@@ -11,7 +11,7 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ValidPartialMaskingExemption {
 
-    String message() default "Either `fromStart` or `fromEnd` must be greater than 0.";
+    String message() default "{validation.partialMaskingExemption.fromStartOrFromEnd.required}";
 
     Class<?>[] groups() default {};
 

@@ -11,7 +11,7 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ValidRegexList {
 
-    String message() default "List contains one or more invalid regular expression patterns";
+    String message() default "{validation.regexList.required}";
 
     Class<?>[] groups() default {};
 
