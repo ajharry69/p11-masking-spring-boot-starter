@@ -57,15 +57,16 @@ class ApplicationTests {
                   "session_state": "ta15irl9lXT7Vx3K96i-TLgi",
                   "scope": "openid"
                 }""";
-        log.info("Test custom regex for my auth result record: {} => {}", new AuthResultRecord("mytoken"), response);
-        log.info("Test custom regex for my auth result regular class: {} => {}", new AuthResult("mytoken"), response);
-        log.info("Test custom regex for my auth result annotation: {} => {}", new AuthResultAnnotation("mytoken"), response);
+        log.info(response);
+        log.info("Test custom regex for my auth result record: {}", new AuthResultRecord("mytoken"));
+        log.info("Test custom regex for my auth result regular class: {}", new AuthResult("mytoken"));
+        log.info("Test custom regex for my auth result annotation: {}", new AuthResultAnnotation("mytoken"));
 
         assertThat(
                 output.getOut(),
                 allOf(
                         containsString("""
-                                Test custom regex for my auth result record: AuthResultRecord[token=m********] => {
+                                {
                                   "access_token": "e********",
                                   "expires_in": 300,
                                   "refresh_expires_in": 1800,
@@ -77,29 +78,11 @@ class ApplicationTests {
                                   "scope": "openid"
                                 }"""),
                         containsString("""
-                                Test custom regex for my auth result regular class: AuthResult(token=m********) => {
-                                  "access_token": "e********",
-                                  "expires_in": 300,
-                                  "refresh_expires_in": 1800,
-                                  "refresh_token": "e********",
-                                  "token_type": "B********",
-                                  "id_token": "e********",
-                                  "not-before-policy": 0,
-                                  "session_state": "ta15irl9lXT7Vx3K96i-TLgi",
-                                  "scope": "openid"
-                                }"""),
+                                Test custom regex for my auth result record: AuthResultRecord[token=m********]"""),
                         containsString("""
-                                Test custom regex for my auth result annotation: m******** => {
-                                  "access_token": "e********",
-                                  "expires_in": 300,
-                                  "refresh_expires_in": 1800,
-                                  "refresh_token": "e********",
-                                  "token_type": "B********",
-                                  "id_token": "e********",
-                                  "not-before-policy": 0,
-                                  "session_state": "ta15irl9lXT7Vx3K96i-TLgi",
-                                  "scope": "openid"
-                                }""")
+                                Test custom regex for my auth result regular class: AuthResult(token=m********)"""),
+                        containsString("""
+                                Test custom regex for my auth result annotation: m********""")
                 )
         );
     }
