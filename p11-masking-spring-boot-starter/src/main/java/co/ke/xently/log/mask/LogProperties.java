@@ -55,7 +55,7 @@ public class LogProperties {
          */
         @Builder.Default
         @Pattern(regexp = "[^\\t\\n\\r]+", message = "Log forging replacement must not contain tab (\\t), newline (\\n) or carriage return (\\r) characters")
-        private String replacement = "_";
+        private String replacement = " ";
         /**
          * If true, continuous illegal characters are replaced with a single instance of the replacement string.
          */

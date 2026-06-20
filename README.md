@@ -41,7 +41,7 @@ The APIs can be tested through - http://localhost:8080/scalar
 ```yaml
 log:
   forging:
-    replacement: "_" # optional, default _
+    replacement: " " # optional, default (space)
     replace-continuous-at-once: true # optional, default true
   p11:
     masking:

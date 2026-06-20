@@ -741,7 +741,7 @@ class LogMaskingAndForgingConverterTest {
             var output = convert("payload={}", dto);
 
             assertAll(
-                    () -> assertThat(output, containsString("first_second_third_fourth")),
+                    () -> assertThat(output, containsString("first second third fourth")),
                     () -> assertThat(output, not(containsString("\n"))),
                     () -> assertThat(output, not(containsString("\r"))),
                     () -> assertThat(output, not(containsString("\t")))
@@ -755,7 +755,7 @@ class LogMaskingAndForgingConverterTest {
             var output = convert("payload={}", payload);
 
             assertAll(
-                    () -> assertThat(output, containsString("alpha_ beta_ gamma_ delta")),
+                    () -> assertThat(output, containsString("alpha  beta  gamma  delta")),
                     () -> assertThat(output, not(containsString("\n"))),
                     () -> assertThat(output, not(containsString("\r"))),
                     () -> assertThat(output, not(containsString("\t")))
