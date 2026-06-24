@@ -6,7 +6,7 @@
 
 A spring boot starter and demo showing sensitive data masking in logs.
 
-- Spring Boot: 4.x (Jackson 3 `tools.jackson.*`)
+- Spring Boot: 4.x
 - Java: 21 (LTS)
 - Tests: JUnit 5 with Hamcrest
 - Integration: H2 + Rest-Assured
